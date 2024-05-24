@@ -310,8 +310,7 @@ class GeoDataManager {
             const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
             const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
             const latLng = nodes2ts_1.S2LatLng.fromDegrees(latitude, longitude);
-            return (centerLatLng.getEarthDistance(latLng).toNumber() <=
-                radiusInMeter);
+            return centerLatLng.getEarthDistance(latLng) <= radiusInMeter;
         });
     }
     /**

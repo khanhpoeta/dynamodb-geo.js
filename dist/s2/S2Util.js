@@ -26,10 +26,8 @@ class S2Util {
         const latReferenceLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude + latReferenceUnit, centerPoint.longitude);
         const lngReferenceUnit = centerPoint.longitude > 0.0 ? -1.0 : 1.0;
         const lngReferenceLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude, centerPoint.longitude + lngReferenceUnit);
-        const latForRadius = radiusInMeter /
-            centerLatLng.getEarthDistance(latReferenceLatLng).toNumber();
-        const lngForRadius = radiusInMeter /
-            centerLatLng.getEarthDistance(lngReferenceLatLng).toNumber();
+        const latForRadius = radiusInMeter / centerLatLng.getEarthDistance(latReferenceLatLng);
+        const lngForRadius = radiusInMeter / centerLatLng.getEarthDistance(lngReferenceLatLng);
         const minLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude - latForRadius, centerPoint.longitude - lngForRadius);
         const maxLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude + latForRadius, centerPoint.longitude + lngForRadius);
         return nodes2ts_1.S2LatLngRect.fromLatLng(minLatLng, maxLatLng);
