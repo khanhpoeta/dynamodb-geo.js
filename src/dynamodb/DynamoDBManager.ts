@@ -42,7 +42,25 @@ export class DynamoDBManager {
 
   constructor(config: GeoDataManagerConfiguration) {
     this._config = config;
-    this._ddbDocClient = DynamoDBDocumentClient.from(config.dynamoDBClient);
+    const marshallOptions = {
+      // Whether to automatically convert empty strings, blobs, and sets to `null`.
+      // convertEmptyValues: false, // false, by default.
+      // Whether to remove undefined values while marshalling.
+      removeUndefinedValues: true, // false, by default.
+      // Whether to convert typeof object to map attribute.
+      convertClassInstanceToMap: true, // false, by default. <---- Set this flag
+    };
+
+    const unmarshallOptions = {
+      // Whether to return numbers as a string instead of converting them to native JavaScript numbers.
+      // wrapNumbers: false, // false, by default.
+    };
+
+    const translateConfig = { marshallOptions, unmarshallOptions };
+    this._ddbDocClient = DynamoDBDocumentClient.from(
+      config.dynamoDBClient,
+      translateConfig,
+    );
   }
 
   /**

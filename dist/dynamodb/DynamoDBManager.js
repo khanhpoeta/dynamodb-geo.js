@@ -20,7 +20,20 @@ const lib_dynamodb_1 = require("@aws-sdk/lib-dynamodb");
 class DynamoDBManager {
     constructor(config) {
         this._config = config;
-        this._ddbDocClient = lib_dynamodb_1.DynamoDBDocumentClient.from(config.dynamoDBClient);
+        const marshallOptions = {
+            // Whether to automatically convert empty strings, blobs, and sets to `null`.
+            // convertEmptyValues: false, // false, by default.
+            // Whether to remove undefined values while marshalling.
+            removeUndefinedValues: true,
+            // Whether to convert typeof object to map attribute.
+            convertClassInstanceToMap: true, // false, by default. <---- Set this flag
+        };
+        const unmarshallOptions = {
+        // Whether to return numbers as a string instead of converting them to native JavaScript numbers.
+        // wrapNumbers: false, // false, by default.
+        };
+        const translateConfig = { marshallOptions, unmarshallOptions };
+        this._ddbDocClient = lib_dynamodb_1.DynamoDBDocumentClient.from(config.dynamoDBClient, translateConfig);
     }
     /**
      * Query Amazon DynamoDB
