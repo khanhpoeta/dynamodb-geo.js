@@ -6,14 +6,11 @@
     "noImplicitAny": false,
     "sourceMap": false,
     "lib": ["es2020", "dom"],
-    "rootDir": "./src" /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
     "outDir": "dist" /* Redirect output structure to the directory. */,
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "skipLibCheck": true
   },
+  "include": ["src/**/*"],
   "exclude": ["dist", "test"]
 }
