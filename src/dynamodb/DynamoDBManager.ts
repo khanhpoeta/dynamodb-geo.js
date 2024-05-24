@@ -91,6 +91,12 @@ export class DynamoDBManager {
 
       const minRange = range.rangeMin.toInt();
       const maxRange = range.rangeMax.toInt();
+      console.log('minRange', minRange);
+      console.log('maxRange', maxRange);
+      input.KeyConditions[this._config.geohashAttributeName] = {
+        ComparisonOperator: 'BETWEEN',
+        AttributeValueList: [minRange, maxRange],
+      };
 
       const defaults: QueryCommandInput = {
         TableName: this._config.tableName,
@@ -98,13 +104,9 @@ export class DynamoDBManager {
         IndexName: this._config.geohashIndexName,
         ConsistentRead: this._config.consistentRead,
         ReturnConsumedCapacity: 'TOTAL',
-        FilterExpression:
-          'geohash BETWEEN :minRange AND :maxRange' +
-          (queryInput?.FilterExpression || ''),
+        FilterExpression: queryInput?.FilterExpression || '',
         ExpressionAttributeValues: {
           ...queryInput?.ExpressionAttributeValues,
-          ':minRange': minRange,
-          ':maxRange': maxRange,
         },
         ExclusiveStartKey: lastEvaluatedKey,
       };
