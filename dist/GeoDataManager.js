@@ -305,7 +305,7 @@ class GeoDataManager {
         const centerLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude, centerPoint.longitude);
         radiusInMeter = geoQueryInput.RadiusInMeter;
         return list.filter(item => {
-            const geoJson = item[this.config.geoJsonAttributeName].S;
+            const geoJson = item[this.config.geoJsonAttributeName];
             const coordinates = JSON.parse(geoJson).coordinates;
             const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
             const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
@@ -323,7 +323,7 @@ class GeoDataManager {
     filterByRectangle(list, geoQueryInput) {
         const latLngRect = S2Util_1.S2Util.latLngRectFromQueryRectangleInput(geoQueryInput);
         return list.filter(item => {
-            const geoJson = item[this.config.geoJsonAttributeName].S;
+            const geoJson = item[this.config.geoJsonAttributeName];
             const coordinates = JSON.parse(geoJson).coordinates;
             const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
             const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];

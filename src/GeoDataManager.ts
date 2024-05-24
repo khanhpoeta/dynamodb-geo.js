@@ -327,7 +327,7 @@ export class GeoDataManager {
         );
       });
 
-    const results: QueryCommandOutput[][] = await Promise.all(promises);
+    const results = await Promise.all(promises);
     const mergedResults: Record<string, any>[] = [];
     results.forEach(queryOutputs =>
       queryOutputs.forEach(queryOutput => {
@@ -361,7 +361,7 @@ export class GeoDataManager {
     radiusInMeter = (geoQueryInput as QueryRadiusInput).RadiusInMeter;
 
     return list.filter(item => {
-      const geoJson: string = item[this.config.geoJsonAttributeName].S;
+      const geoJson: string = item[this.config.geoJsonAttributeName];
       const coordinates = JSON.parse(geoJson).coordinates;
       const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
       const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
@@ -385,7 +385,7 @@ export class GeoDataManager {
     const latLngRect = S2Util.latLngRectFromQueryRectangleInput(geoQueryInput);
 
     return list.filter(item => {
-      const geoJson: string = item[this.config.geoJsonAttributeName].S;
+      const geoJson: string = item[this.config.geoJsonAttributeName];
       const coordinates = JSON.parse(geoJson).coordinates;
       const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
       const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
