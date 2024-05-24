@@ -91,12 +91,12 @@ export class DynamoDBManager {
 
       const minRange = range.rangeMin.toInt();
       const maxRange = range.rangeMax.toInt();
+      const ranges = [minRange, maxRange];
       console.log('hashKey', hashKey.toInt());
-      console.log('minRange', minRange);
-      console.log('maxRange', maxRange);
+      console.log('ranges', ranges);
       input.KeyConditions[this._config.geohashAttributeName] = {
         ComparisonOperator: 'BETWEEN',
-        AttributeValueList: [minRange, maxRange],
+        AttributeValueList: [Math.min(...ranges), Math.max(...ranges)],
       };
 
       const defaults: QueryCommandInput = {
@@ -144,7 +144,7 @@ export class DynamoDBManager {
     const commandInput: GetCommandInput = {
       TableName: this._config.tableName,
       Key: {
-        [this._config.hashKeyAttributeName]: new Number(hashKey.toString(10)),
+        [this._config.hashKeyAttributeName]: hashKey.toInt(),
         [this._config.rangeKeyAttributeName]: getPointInput.RangeKeyValue,
       },
     };
@@ -198,13 +198,9 @@ export class DynamoDBManager {
       if (putItemInput.Item) {
         Item = putItemInput.Item;
       }
-      Item[this._config.hashKeyAttributeName] = new Number(
-        hashKey.toString(10),
-      );
+      Item[this._config.hashKeyAttributeName] = hashKey.toInt();
       Item[this._config.rangeKeyAttributeName] = i.RangeKeyValue;
-      Item[this._config.geohashAttributeName] = new Number(
-        geohash.toString(10),
-      );
+      Item[this._config.geohashAttributeName] = geohash.toInt();
       Item[this._config.geoJsonAttributeName] = JSON.stringify({
         type: this._config.geoJsonPointType,
         coordinates: this._config.longitudeFirst
@@ -235,7 +231,7 @@ export class DynamoDBManager {
     }
 
     updatePointInput.UpdateItemInput.Key[this._config.hashKeyAttributeName] =
-      new Number(hashKey.toString(10));
+      hashKey.toInt();
     updatePointInput.UpdateItemInput.Key[this._config.rangeKeyAttributeName] =
       updatePointInput.RangeKeyValue;
 
@@ -266,7 +262,7 @@ export class DynamoDBManager {
         ...deletePointInput,
         TableName: this._config.tableName,
         Key: {
-          [this._config.hashKeyAttributeName]: new Number(hashKey.toString(10)),
+          [this._config.hashKeyAttributeName]: hashKey.toInt(),
           [this._config.rangeKeyAttributeName]: deletePointInput.RangeKeyValue,
         },
       }),
