@@ -104,12 +104,16 @@ export class DynamoDBManager {
         IndexName: this._config.geohashIndexName,
         ConsistentRead: this._config.consistentRead,
         ReturnConsumedCapacity: 'TOTAL',
-        FilterExpression: queryInput?.FilterExpression || '',
-        ExpressionAttributeValues: {
-          ...queryInput?.ExpressionAttributeValues,
-        },
         ExclusiveStartKey: lastEvaluatedKey,
       };
+      if (
+        queryInput?.FilterExpression &&
+        queryInput?.ExpressionAttributeValues
+      ) {
+        defaults.FilterExpression = queryInput.FilterExpression;
+        defaults.ExpressionAttributeValues =
+          queryInput.ExpressionAttributeValues;
+      }
 
       const queryOutput = await this._ddbDocClient.send(
         new QueryCommand(defaults),
