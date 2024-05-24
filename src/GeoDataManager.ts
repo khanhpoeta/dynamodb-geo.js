@@ -1,19 +1,19 @@
 /*
  * Copyright 2010-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at
- * 
+ *
  * http://aws.amazon.com/apache2.0
- * 
+ *
  * or in the "license" file accompanying this file. This file is distributed
  * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-import { DynamoDBManager } from "./dynamodb/DynamoDBManager";
-import { GeoDataManagerConfiguration } from "./GeoDataManagerConfiguration";
+import { DynamoDBManager } from './dynamodb/DynamoDBManager';
+import { GeoDataManagerConfiguration } from './GeoDataManagerConfiguration';
 import {
   DeletePointInput,
   GeoPoint,
@@ -23,12 +23,15 @@ import {
   QueryRadiusInput,
   QueryRectangleInput,
   UpdatePointInput,
-} from "./types";
-import { S2Manager } from "./s2/S2Manager";
-import { S2Util } from "./s2/S2Util";
-import { S2LatLng, S2LatLngRect } from "nodes2ts";
-import { Covering } from "./model/Covering";
-import { NativeAttributeValue, QueryCommandOutput } from "@aws-sdk/lib-dynamodb";
+} from './types';
+import { S2Manager } from './s2/S2Manager';
+import { S2Util } from './s2/S2Util';
+import { S2LatLng, S2LatLngRect } from 'nodes2ts';
+import { Covering } from './model/Covering';
+import {
+  NativeAttributeValue,
+  QueryCommandOutput,
+} from '@aws-sdk/lib-dynamodb';
 
 /**
  * <p>
@@ -106,7 +109,7 @@ export class GeoDataManager {
    *
    * @return Result of put point request.
    */
-  public putPoint(putPointInput: PutPointInput){
+  public putPoint(putPointInput: PutPointInput) {
     return this.dynamoDBManager.putPoint(putPointInput);
   }
 
@@ -190,14 +193,16 @@ export class GeoDataManager {
    * @return Result of rectangle query request.
    */
   public async queryRectangle(queryRectangleInput: QueryRectangleInput) {
-    const latLngRect = S2Util.latLngRectFromQueryRectangleInput(queryRectangleInput);
-if(latLngRect)
-  {
-    const covering = new Covering(new this.config.S2RegionCoverer().getCoveringCells(latLngRect));
+    const latLngRect =
+      S2Util.latLngRectFromQueryRectangleInput(queryRectangleInput);
+    if (latLngRect) {
+      const covering = new Covering(
+        new this.config.S2RegionCoverer().getCoveringCells(latLngRect),
+      );
 
-    const results = await this.dispatchQueries(covering, queryRectangleInput);
-    return this.filterByRectangle(results, queryRectangleInput);
-  }
+      const results = await this.dispatchQueries(covering, queryRectangleInput);
+      return this.filterByRectangle(results, queryRectangleInput);
+    }
     return [];
   }
 
@@ -224,9 +229,12 @@ if(latLngRect)
    * @return Result of radius query request.
    * */
   public async queryRadius(queryRadiusInput: QueryRadiusInput) {
-    const latLngRect: S2LatLngRect = S2Util.getBoundingLatLngRectFromQueryRadiusInput(queryRadiusInput);
+    const latLngRect: S2LatLngRect =
+      S2Util.getBoundingLatLngRectFromQueryRadiusInput(queryRadiusInput);
 
-    const covering = new Covering(new this.config.S2RegionCoverer().getCoveringCells(latLngRect));
+    const covering = new Covering(
+      new this.config.S2RegionCoverer().getCoveringCells(latLngRect),
+    );
 
     const results = await this.dispatchQueries(covering, queryRadiusInput);
     return this.filterByRadius(results, queryRadiusInput);
@@ -301,20 +309,33 @@ if(latLngRect)
    *
    * @return Aggregated and filtered items returned from Amazon DynamoDB.
    */
-  private async dispatchQueries(covering: Covering, geoQueryInput: GeoQueryInput) {
-    const promises: Promise<QueryCommandOutput[]>[] = covering.getGeoHashRanges(this.config.hashKeyLength).map(range => {
-      const hashKey = S2Manager.generateHashKey(range.rangeMin, this.config.hashKeyLength);
-      return this.dynamoDBManager.queryGeohash(geoQueryInput.QueryInput, hashKey, range);
-    });
+  private async dispatchQueries(
+    covering: Covering,
+    geoQueryInput: GeoQueryInput,
+  ) {
+    const promises: Promise<QueryCommandOutput[]>[] = covering
+      .getGeoHashRanges(this.config.hashKeyLength)
+      .map(range => {
+        const hashKey = S2Manager.generateHashKey(
+          range.rangeMin,
+          this.config.hashKeyLength,
+        );
+        return this.dynamoDBManager.queryGeohash(
+          geoQueryInput.QueryInput,
+          hashKey,
+          range,
+        );
+      });
 
     const results: QueryCommandOutput[][] = await Promise.all(promises);
-    const mergedResults:Record<string,any>[] = []
-    results.forEach(queryOutputs => queryOutputs.forEach(queryOutput => {
-      if(queryOutput.Items)
-        {
-          mergedResults.push(...queryOutput.Items)
+    const mergedResults: Record<string, any>[] = [];
+    results.forEach(queryOutputs =>
+      queryOutputs.forEach(queryOutput => {
+        if (queryOutput.Items) {
+          mergedResults.push(...queryOutput.Items);
         }
-    }));
+      }),
+    );
     return mergedResults;
   }
 
@@ -325,13 +346,19 @@ if(latLngRect)
    * @param geoQueryInput
    * @returns DynamoDB.ItemList
    */
-  private filterByRadius(list: Record<string, NativeAttributeValue>[], geoQueryInput: QueryRadiusInput) {
+  private filterByRadius(
+    list: Record<string, NativeAttributeValue>[],
+    geoQueryInput: QueryRadiusInput,
+  ) {
     let radiusInMeter = 0;
 
-    const centerPoint: GeoPoint = (geoQueryInput as QueryRadiusInput).CenterPoint;
-    const centerLatLng = S2LatLng.fromDegrees(centerPoint.latitude, centerPoint.longitude);
+    const centerPoint: GeoPoint = (geoQueryInput as QueryRadiusInput)
+      .CenterPoint;
+    const centerLatLng = S2LatLng.fromDegrees(
+      centerPoint.latitude,
+      centerPoint.longitude,
+    );
     radiusInMeter = (geoQueryInput as QueryRadiusInput).RadiusInMeter;
-
 
     return list.filter(item => {
       const geoJson: string = item[this.config.geoJsonAttributeName].S;
@@ -340,7 +367,10 @@ if(latLngRect)
       const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
 
       const latLng: S2LatLng = S2LatLng.fromDegrees(latitude, longitude);
-      return (centerLatLng.getEarthDistance(latLng) as any).toNumber() <= radiusInMeter;
+      return (
+        (centerLatLng.getEarthDistance(latLng) as any).toNumber() <=
+        radiusInMeter
+      );
     });
   }
 
@@ -351,20 +381,22 @@ if(latLngRect)
    * @param geoQueryInput
    * @returns DynamoDB.ItemList
    */
-  private filterByRectangle(list: Record<string, NativeAttributeValue>[], geoQueryInput: QueryRectangleInput): Record<string, NativeAttributeValue>[] {
+  private filterByRectangle(
+    list: Record<string, NativeAttributeValue>[],
+    geoQueryInput: QueryRectangleInput,
+  ): Record<string, NativeAttributeValue>[] {
     const latLngRect = S2Util.latLngRectFromQueryRectangleInput(geoQueryInput);
-    if(latLngRect)
-      {
-        return list.filter(item => {
-          const geoJson: string = item[this.config.geoJsonAttributeName].S;
-          const coordinates = JSON.parse(geoJson).coordinates;
-          const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
-          const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
-    
-          const latLng: S2LatLng = S2LatLng.fromDegrees(latitude, longitude);
-          return latLngRect.containsLL(latLng);
-        });
-      }
+    if (latLngRect) {
+      return list.filter(item => {
+        const geoJson: string = item[this.config.geoJsonAttributeName].S;
+        const coordinates = JSON.parse(geoJson).coordinates;
+        const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
+        const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
+
+        const latLng: S2LatLng = S2LatLng.fromDegrees(latitude, longitude);
+        return latLngRect.containsLL(latLng);
+      });
+    }
     return [];
   }
 }

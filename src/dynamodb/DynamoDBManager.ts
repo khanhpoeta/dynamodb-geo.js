@@ -31,7 +31,6 @@ import {
   GetCommandInput,
   PutCommand,
   BatchWriteCommand,
-  NativeAttributeValue,
   UpdateCommand,
   DeleteCommand,
 } from '@aws-sdk/lib-dynamodb';
