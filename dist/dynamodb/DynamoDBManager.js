@@ -90,7 +90,10 @@ class DynamoDBManager {
     putPoint(putPointInput) {
         const geohash = S2Manager_1.S2Manager.generateGeohash(putPointInput.GeoPoint);
         const hashKey = S2Manager_1.S2Manager.generateHashKey(geohash, this._config.hashKeyLength);
-        const putItemInput = putPointInput.PutItemInput.Item || { Item: {} };
+        const putItemInput = { Item: {} };
+        if (putPointInput.PutItemInput && putPointInput.PutItemInput.Item) {
+            putItemInput.Item = putPointInput.PutItemInput.Item;
+        }
         putItemInput.Item[this._config.hashKeyAttributeName] = hashKey.toString(10);
         putItemInput.Item[this._config.rangeKeyAttributeName] =
             putPointInput.RangeKeyValue;
@@ -112,7 +115,10 @@ class DynamoDBManager {
             const geohash = S2Manager_1.S2Manager.generateGeohash(i.GeoPoint);
             const hashKey = S2Manager_1.S2Manager.generateHashKey(geohash, this._config.hashKeyLength);
             const putItemInput = i.PutItemInput;
-            const Item = putItemInput.Item || {};
+            let Item = {};
+            if (putItemInput.Item) {
+                Item = putItemInput.Item;
+            }
             Item[this._config.hashKeyAttributeName] = hashKey.toString(10);
             Item[this._config.rangeKeyAttributeName] = i.RangeKeyValue;
             Item[this._config.geohashAttributeName] = geohash.toString(10);
