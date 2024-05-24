@@ -24,7 +24,7 @@ class DynamoDBManager {
             // Whether to automatically convert empty strings, blobs, and sets to `null`.
             // convertEmptyValues: false, // false, by default.
             // Whether to remove undefined values while marshalling.
-            removeUndefinedValues: true,
+            removeUndefinedValues: true, // false, by default.
             // Whether to convert typeof object to map attribute.
             convertClassInstanceToMap: true, // false, by default. <---- Set this flag
         };
