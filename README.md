@@ -18,15 +18,24 @@ Using [npm] or [yarn]:
 First you'll need to import the AWS sdk and set up your DynamoDB connection:
 
 ```js
-const AWS = require('aws-sdk');
-const ddb = new AWS.DynamoDB({ endpoint: new AWS.Endpoint('http://localhost:8000') }); // Local development
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+
+const ddb = new DynamoDBClient({ endpoint: new AWS.Endpoint('http://localhost:8000') }); // optional
 ```
 
 Next you must create an instance of `GeoDataManagerConfiguration` for each geospatial table you wish to interact with. This is a container for various options (see API below), but you must always provide a `DynamoDB` instance and a table name.
 
 ```js
-const ddbGeo = require('dynamodb-geo');
-const config = new ddbGeo.GeoDataManagerConfiguration(ddb, 'MyGeoTable');
+import { GeoDataManagerConfiguration, GeoDataManager } from 'dynamodb-geo';
+
+const config = new GeoDataManagerConfiguration('MyGeoTable', ddb);
+```
+or 
+
+```js
+import { GeoDataManagerConfiguration, GeoDataManager } from 'dynamodb-geo';
+// Using for ec2 or lambda already have permission on your dynamodb table
+const config = new GeoDataManagerConfiguration('MyGeoTable');
 ```
 
 You may modify the config to change defaults.
@@ -38,7 +47,7 @@ config.longitudeFirst = true; // Use spec-compliant GeoJSON, incompatible with a
 Finally, you should instantiate a manager to query and write to the table using this config object.
 
 ```js
-const myGeoTableManager = new ddbGeo.GeoDataManager(config);
+const myGeoTableManager = new GeoDataManager(config);
 ```
 
 ## Choosing a `hashKeyLength` (optimising for performance and cost)
