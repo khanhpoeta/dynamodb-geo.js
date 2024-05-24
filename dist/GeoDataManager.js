@@ -1,4 +1,7 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GeoDataManager = void 0;
 /*
@@ -16,10 +19,11 @@ exports.GeoDataManager = void 0;
  * permissions and limitations under the License.
  */
 const DynamoDBManager_1 = require("./dynamodb/DynamoDBManager");
+const types_1 = require("./types");
 const S2Manager_1 = require("./s2/S2Manager");
 const S2Util_1 = require("./s2/S2Util");
-const nodes2ts_1 = require("nodes2ts");
 const Covering_1 = require("./model/Covering");
+const s2_1 = __importDefault(require("@radarlabs/s2"));
 /**
  * <p>
  * Manager to hangle geo spatial data in Amazon DynamoDB tables. All service calls made using this client are blocking,
@@ -172,9 +176,9 @@ class GeoDataManager {
      * @return Result of rectangle query request.
      */
     async queryRectangle(queryRectangleInput) {
-        const latLngRect = S2Util_1.S2Util.latLngRectFromQueryRectangleInput(queryRectangleInput);
-        if (latLngRect) {
-            const covering = new Covering_1.Covering(new this.config.S2RegionCoverer().getCoveringCells(latLngRect));
+        const configure = this.config.S2RegionCoverer.getCovering([queryRectangleInput.MinPoint, queryRectangleInput.MaxPoint], {})?.cellIds();
+        if (configure) {
+            const covering = new Covering_1.Covering(configure);
             const results = await this.dispatchQueries(covering, queryRectangleInput);
             return this.filterByRectangle(results, queryRectangleInput);
         }
@@ -203,10 +207,13 @@ class GeoDataManager {
      * @return Result of radius query request.
      * */
     async queryRadius(queryRadiusInput) {
-        const latLngRect = S2Util_1.S2Util.getBoundingLatLngRectFromQueryRadiusInput(queryRadiusInput);
-        const covering = new Covering_1.Covering(new this.config.S2RegionCoverer().getCoveringCells(latLngRect));
-        const results = await this.dispatchQueries(covering, queryRadiusInput);
-        return this.filterByRadius(results, queryRadiusInput);
+        const configure = this.config.S2RegionCoverer.getRadiusCovering(queryRadiusInput.CenterPoint, queryRadiusInput.RadiusInMeter, {})?.cellIds();
+        if (configure) {
+            const covering = new Covering_1.Covering(configure);
+            const results = await this.dispatchQueries(covering, queryRadiusInput);
+            return this.filterByRadius(results, queryRadiusInput);
+        }
+        return [];
     }
     /**
      * <p>
@@ -299,18 +306,17 @@ class GeoDataManager {
      * @returns DynamoDB.ItemList
      */
     filterByRadius(list, geoQueryInput) {
-        let radiusInMeter = 0;
-        const centerPoint = geoQueryInput
+        let centerLatLng = geoQueryInput
             .CenterPoint;
-        const centerLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude, centerPoint.longitude);
-        radiusInMeter = geoQueryInput.RadiusInMeter;
+        let radiusInMeter = geoQueryInput.RadiusInMeter ?? 0;
         return list.filter(item => {
             const geoJson = item[this.config.geoJsonAttributeName].S;
             const coordinates = JSON.parse(geoJson).coordinates;
             const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
             const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
-            const latLng = nodes2ts_1.S2LatLng.fromDegrees(latitude, longitude);
-            return centerLatLng.getEarthDistance(latLng) <= radiusInMeter;
+            console.log('gmr', item, geoJson, coordinates, longitude, latitude);
+            const latLng = new types_1.GeoPoint(latitude, longitude);
+            return s2_1.default.Earth.getDistanceMeters(latLng, centerLatLng) <= radiusInMeter;
         });
     }
     /**
@@ -322,17 +328,16 @@ class GeoDataManager {
      */
     filterByRectangle(list, geoQueryInput) {
         const latLngRect = S2Util_1.S2Util.latLngRectFromQueryRectangleInput(geoQueryInput);
-        if (latLngRect) {
-            return list.filter(item => {
-                const geoJson = item[this.config.geoJsonAttributeName].S;
-                const coordinates = JSON.parse(geoJson).coordinates;
-                const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
-                const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
-                const latLng = nodes2ts_1.S2LatLng.fromDegrees(latitude, longitude);
-                return latLngRect.containsLL(latLng);
-            });
-        }
-        return [];
+        return list.filter(item => {
+            const geoJson = item[this.config.geoJsonAttributeName].S;
+            const coordinates = JSON.parse(geoJson).coordinates;
+            const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
+            const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
+            const latLng = new types_1.GeoPoint(latitude, longitude);
+            const cellId = new s2_1.default.CellId(latLng);
+            const cell = new s2_1.default.Cell(cellId);
+            return latLngRect.contains(cell);
+        });
     }
 }
 exports.GeoDataManager = GeoDataManager;

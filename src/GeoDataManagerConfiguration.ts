@@ -12,8 +12,8 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-import { S2RegionCoverer } from 'nodes2ts';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import S2 from '@radarlabs/s2';
 
 export class GeoDataManagerConfiguration {
   // Public constants
@@ -57,7 +57,7 @@ export class GeoDataManagerConfiguration {
 
   dynamoDBClient: DynamoDBClient;
 
-  S2RegionCoverer: typeof S2RegionCoverer;
+  S2RegionCoverer: typeof S2.RegionCoverer;
 
   constructor(
     tableName: string,
@@ -65,6 +65,6 @@ export class GeoDataManagerConfiguration {
   ) {
     this.dynamoDBClient = dynamoDBClient;
     this.tableName = tableName;
-    this.S2RegionCoverer = S2RegionCoverer;
+    this.S2RegionCoverer = S2.RegionCoverer;
   }
 }

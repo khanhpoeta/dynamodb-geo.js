@@ -13,26 +13,24 @@
  * permissions and limitations under the License.
  */
 
-import { S2Cell, S2LatLng } from 'nodes2ts';
 import { GeoPoint } from '../types';
-import Long from 'long';
+import { CellId } from '@radarlabs/s2';
 
 export class S2Manager {
   static generateGeohash(geoPoint: GeoPoint) {
-    const latLng = S2LatLng.fromDegrees(geoPoint.latitude, geoPoint.longitude);
-    const cell = S2Cell.fromLatLng(latLng);
-    const cellId = cell.id;
-    return cellId.id;
+    const s2LatLong = geoPoint;
+    const cell = new CellId(s2LatLong);
+    return cell.id();
   }
 
-  public static generateHashKey(geohash: Long, hashKeyLength: number) {
-    if (geohash.lessThan(0)) {
+  public static generateHashKey(geohash: bigint, hashKeyLength: number) {
+    if (geohash < 0n) {
       // Counteract "-" at beginning of geohash.
       hashKeyLength++;
     }
 
-    const geohashString = geohash.toString(10);
-    const denominator = Math.pow(10, geohashString.length - hashKeyLength);
-    return geohash.divide(denominator);
+    const geohashString = geohash.toString();
+    const denominator = 10n ** BigInt(geohashString.length - hashKeyLength);
+    return geohash / denominator;
   }
 }

@@ -1,6 +1,5 @@
-import { QueryRadiusInput, QueryRectangleInput } from '../types';
-import { S2LatLngRect } from 'nodes2ts';
+import { QueryRectangleInput } from '../types';
+import S2 from '@radarlabs/s2';
 export declare class S2Util {
-    static latLngRectFromQueryRectangleInput(geoQueryRequest: QueryRectangleInput): S2LatLngRect | null;
-    static getBoundingLatLngRectFromQueryRadiusInput(geoQueryRequest: QueryRadiusInput): S2LatLngRect;
+    static latLngRectFromQueryRectangleInput(geoQueryRequest: QueryRectangleInput): S2.Polyline;
 }

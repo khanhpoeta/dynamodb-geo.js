@@ -26,12 +26,12 @@ import {
 } from './types';
 import { S2Manager } from './s2/S2Manager';
 import { S2Util } from './s2/S2Util';
-import { S2LatLng, S2LatLngRect } from 'nodes2ts';
 import { Covering } from './model/Covering';
 import {
   NativeAttributeValue,
   QueryCommandOutput,
 } from '@aws-sdk/lib-dynamodb';
+import S2 from '@radarlabs/s2';
 
 /**
  * <p>
@@ -193,12 +193,12 @@ export class GeoDataManager {
    * @return Result of rectangle query request.
    */
   public async queryRectangle(queryRectangleInput: QueryRectangleInput) {
-    const latLngRect =
-      S2Util.latLngRectFromQueryRectangleInput(queryRectangleInput);
-    if (latLngRect) {
-      const covering = new Covering(
-        new this.config.S2RegionCoverer().getCoveringCells(latLngRect),
-      );
+    const configure = this.config.S2RegionCoverer.getCovering(
+      [queryRectangleInput.MinPoint, queryRectangleInput.MaxPoint],
+      {},
+    )?.cellIds();
+    if (configure) {
+      const covering = new Covering(configure);
 
       const results = await this.dispatchQueries(covering, queryRectangleInput);
       return this.filterByRectangle(results, queryRectangleInput);
@@ -229,15 +229,18 @@ export class GeoDataManager {
    * @return Result of radius query request.
    * */
   public async queryRadius(queryRadiusInput: QueryRadiusInput) {
-    const latLngRect: S2LatLngRect =
-      S2Util.getBoundingLatLngRectFromQueryRadiusInput(queryRadiusInput);
+    const configure = this.config.S2RegionCoverer.getRadiusCovering(
+      queryRadiusInput.CenterPoint,
+      queryRadiusInput.RadiusInMeter,
+      {},
+    )?.cellIds();
+    if (configure) {
+      const covering = new Covering(configure);
 
-    const covering = new Covering(
-      new this.config.S2RegionCoverer().getCoveringCells(latLngRect),
-    );
-
-    const results = await this.dispatchQueries(covering, queryRadiusInput);
-    return this.filterByRadius(results, queryRadiusInput);
+      const results = await this.dispatchQueries(covering, queryRadiusInput);
+      return this.filterByRadius(results, queryRadiusInput);
+    }
+    return [];
   }
 
   /**
@@ -347,27 +350,23 @@ export class GeoDataManager {
    * @returns DynamoDB.ItemList
    */
   private filterByRadius(
-    list: Record<string, NativeAttributeValue>[],
+    list: Array<Record<string, NativeAttributeValue>>,
     geoQueryInput: QueryRadiusInput,
-  ) {
-    let radiusInMeter = 0;
-
-    const centerPoint: GeoPoint = (geoQueryInput as QueryRadiusInput)
+  ): Array<Record<string, NativeAttributeValue>> {
+    let centerLatLng: GeoPoint = (geoQueryInput as QueryRadiusInput)
       .CenterPoint;
-    const centerLatLng = S2LatLng.fromDegrees(
-      centerPoint.latitude,
-      centerPoint.longitude,
-    );
-    radiusInMeter = (geoQueryInput as QueryRadiusInput).RadiusInMeter;
+    let radiusInMeter = (geoQueryInput as QueryRadiusInput).RadiusInMeter ?? 0;
 
     return list.filter(item => {
       const geoJson: string = item[this.config.geoJsonAttributeName].S;
       const coordinates = JSON.parse(geoJson).coordinates;
       const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
       const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
+      console.log('gmr', item, geoJson, coordinates, longitude, latitude);
 
-      const latLng: S2LatLng = S2LatLng.fromDegrees(latitude, longitude);
-      return centerLatLng.getEarthDistance(latLng) <= radiusInMeter;
+      const latLng = new GeoPoint(latitude, longitude);
+
+      return S2.Earth.getDistanceMeters(latLng, centerLatLng) <= radiusInMeter;
     });
   }
 
@@ -379,21 +378,22 @@ export class GeoDataManager {
    * @returns DynamoDB.ItemList
    */
   private filterByRectangle(
-    list: Record<string, NativeAttributeValue>[],
+    list: Array<Record<string, NativeAttributeValue>>,
     geoQueryInput: QueryRectangleInput,
-  ): Record<string, NativeAttributeValue>[] {
-    const latLngRect = S2Util.latLngRectFromQueryRectangleInput(geoQueryInput);
-    if (latLngRect) {
-      return list.filter(item => {
-        const geoJson: string = item[this.config.geoJsonAttributeName].S;
-        const coordinates = JSON.parse(geoJson).coordinates;
-        const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
-        const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
+  ): Array<Record<string, NativeAttributeValue>> {
+    const latLngRect: S2.Polyline =
+      S2Util.latLngRectFromQueryRectangleInput(geoQueryInput);
 
-        const latLng: S2LatLng = S2LatLng.fromDegrees(latitude, longitude);
-        return latLngRect.containsLL(latLng);
-      });
-    }
-    return [];
+    return list.filter(item => {
+      const geoJson: string = item[this.config.geoJsonAttributeName].S;
+      const coordinates = JSON.parse(geoJson).coordinates;
+      const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
+      const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
+
+      const latLng: GeoPoint = new GeoPoint(latitude, longitude);
+      const cellId = new S2.CellId(latLng);
+      const cell = new S2.Cell(cellId);
+      return latLngRect.contains(cell);
+    });
   }
 }

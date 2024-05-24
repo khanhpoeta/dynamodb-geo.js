@@ -53,10 +53,10 @@ class DynamoDBManager {
             const input = { KeyConditions: {} };
             input.KeyConditions[this._config.hashKeyAttributeName] = {
                 ComparisonOperator: 'EQ',
-                AttributeValueList: [hashKey.toInt()],
+                AttributeValueList: [new Number(hashKey.toString(10))],
             };
-            const minRange = range.rangeMin.toInt();
-            const maxRange = range.rangeMax.toInt();
+            const minRange = new Number(range.rangeMin.toString(10));
+            const maxRange = new Number(range.rangeMax.toString(10));
             console.log('minRange', minRange);
             console.log('maxRange', maxRange);
             input.KeyConditions[this._config.geohashAttributeName] = {
@@ -95,7 +95,7 @@ class DynamoDBManager {
         const commandInput = {
             TableName: this._config.tableName,
             Key: {
-                [this._config.hashKeyAttributeName]: hashKey.toInt(),
+                [this._config.hashKeyAttributeName]: new Number(hashKey.toString(10)),
                 [this._config.rangeKeyAttributeName]: getPointInput.RangeKeyValue,
             },
         };
@@ -109,9 +109,9 @@ class DynamoDBManager {
         const geohash = S2Manager_1.S2Manager.generateGeohash(putPointInput.GeoPoint);
         const hashKey = S2Manager_1.S2Manager.generateHashKey(geohash, this._config.hashKeyLength);
         const item = {
-            [this._config.hashKeyAttributeName]: hashKey.toInt(),
+            [this._config.hashKeyAttributeName]: new Number(hashKey.toString(10)),
             [this._config.rangeKeyAttributeName]: putPointInput.RangeKeyValue,
-            [this._config.geohashAttributeName]: geohash.toInt(),
+            [this._config.geohashAttributeName]: new Number(geohash.toString(10)),
             [this._config.geoJsonAttributeName]: JSON.stringify({
                 type: this._config.geoJsonPointType,
                 coordinates: this._config.longitudeFirst
@@ -138,9 +138,9 @@ class DynamoDBManager {
             if (putItemInput.Item) {
                 Item = putItemInput.Item;
             }
-            Item[this._config.hashKeyAttributeName] = hashKey.toInt();
+            Item[this._config.hashKeyAttributeName] = new Number(hashKey.toString(10));
             Item[this._config.rangeKeyAttributeName] = i.RangeKeyValue;
-            Item[this._config.geohashAttributeName] = geohash.toInt();
+            Item[this._config.geohashAttributeName] = new Number(geohash.toString(10));
             Item[this._config.geoJsonAttributeName] = JSON.stringify({
                 type: this._config.geoJsonPointType,
                 coordinates: this._config.longitudeFirst
@@ -158,13 +158,13 @@ class DynamoDBManager {
     }
     updatePoint(updatePointInput) {
         const geohash = S2Manager_1.S2Manager.generateGeohash(updatePointInput.GeoPoint);
-        const hashKey = S2Manager_1.S2Manager.generateHashKey(geohash, this._config.hashKeyLength).toInt();
+        const hashKey = S2Manager_1.S2Manager.generateHashKey(geohash, this._config.hashKeyLength);
         updatePointInput.UpdateItemInput.TableName = this._config.tableName;
         if (!updatePointInput.UpdateItemInput.Key) {
             updatePointInput.UpdateItemInput.Key = {};
         }
         updatePointInput.UpdateItemInput.Key[this._config.hashKeyAttributeName] =
-            hashKey;
+            new Number(hashKey.toString(10));
         updatePointInput.UpdateItemInput.Key[this._config.rangeKeyAttributeName] =
             updatePointInput.RangeKeyValue;
         // Geohash and geoJson cannot be updated.
@@ -181,7 +181,7 @@ class DynamoDBManager {
             ...deletePointInput,
             TableName: this._config.tableName,
             Key: {
-                [this._config.hashKeyAttributeName]: hashKey.toInt(),
+                [this._config.hashKeyAttributeName]: new Number(hashKey.toString(10)),
                 [this._config.rangeKeyAttributeName]: deletePointInput.RangeKeyValue,
             },
         }));

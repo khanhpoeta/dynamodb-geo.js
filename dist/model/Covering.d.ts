@@ -1,8 +1,8 @@
-import { S2CellId } from 'nodes2ts';
+import { CellId } from '@radarlabs/s2';
 import { GeohashRange } from './GeohashRange';
 export declare class Covering {
     private cellIds;
-    constructor(cellIds: S2CellId[]);
+    constructor(cellIds: CellId[]);
     getGeoHashRanges(hashKeyLength: number): GeohashRange[];
     getNumberOfCells(): number;
 }
