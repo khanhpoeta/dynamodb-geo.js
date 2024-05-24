@@ -68,11 +68,11 @@ export class DynamoDBManager {
       const input = { KeyConditions: {} };
       input.KeyConditions[this._config.hashKeyAttributeName] = {
         ComparisonOperator: 'EQ',
-        AttributeValueList: [hashKey.toString(10)],
+        AttributeValueList: [hashKey],
       };
 
-      const minRange = range.rangeMin.toString(10);
-      const maxRange = range.rangeMax.toString(10);
+      const minRange = range.rangeMin;
+      const maxRange = range.rangeMax;
 
       const defaults: QueryCommandInput = {
         TableName: this._config.tableName,
@@ -138,9 +138,9 @@ export class DynamoDBManager {
       this._config.hashKeyLength,
     );
     const item = {
-      [this._config.hashKeyAttributeName]: hashKey.toString(10),
+      [this._config.hashKeyAttributeName]: hashKey,
       [this._config.rangeKeyAttributeName]: putPointInput.RangeKeyValue,
-      [this._config.geohashAttributeName]: geohash.toString(10),
+      [this._config.geohashAttributeName]: geohash,
       [this._config.geoJsonAttributeName]: JSON.stringify({
         type: this._config.geoJsonPointType,
         coordinates: this._config.longitudeFirst
@@ -173,9 +173,9 @@ export class DynamoDBManager {
       if (putItemInput.Item) {
         Item = putItemInput.Item;
       }
-      Item[this._config.hashKeyAttributeName] = hashKey.toString(10);
+      Item[this._config.hashKeyAttributeName] = hashKey;
       Item[this._config.rangeKeyAttributeName] = i.RangeKeyValue;
-      Item[this._config.geohashAttributeName] = geohash.toString(10);
+      Item[this._config.geohashAttributeName] = geohash;
       Item[this._config.geoJsonAttributeName] = JSON.stringify({
         type: this._config.geoJsonPointType,
         coordinates: this._config.longitudeFirst
@@ -237,7 +237,7 @@ export class DynamoDBManager {
         ...deletePointInput,
         TableName: this._config.tableName,
         Key: {
-          [this._config.hashKeyAttributeName]: hashKey.toString(10),
+          [this._config.hashKeyAttributeName]: hashKey,
           [this._config.rangeKeyAttributeName]: deletePointInput.RangeKeyValue,
         },
       }),
