@@ -90,24 +90,25 @@ class DynamoDBManager {
     putPoint(putPointInput) {
         const geohash = S2Manager_1.S2Manager.generateGeohash(putPointInput.GeoPoint);
         const hashKey = S2Manager_1.S2Manager.generateHashKey(geohash, this._config.hashKeyLength);
-        const putItemInput = { Item: {} };
-        if (putPointInput.PutItemInput && putPointInput.PutItemInput.Item) {
-            putItemInput.Item = putPointInput.PutItemInput.Item;
-        }
-        putItemInput.Item[this._config.hashKeyAttributeName] = hashKey.toString(10);
-        putItemInput.Item[this._config.rangeKeyAttributeName] =
-            putPointInput.RangeKeyValue;
-        putItemInput.Item[this._config.geohashAttributeName] = geohash.toString(10);
-        putItemInput.Item[this._config.geoJsonAttributeName] = JSON.stringify({
-            type: this._config.geoJsonPointType,
-            coordinates: this._config.longitudeFirst
-                ? [putPointInput.GeoPoint.longitude, putPointInput.GeoPoint.latitude]
-                : [putPointInput.GeoPoint.latitude, putPointInput.GeoPoint.longitude],
-        });
-        return this._ddbDocClient.send(new lib_dynamodb_1.PutCommand({
-            Item: putItemInput.Item,
+        const item = {
+            [this._config.hashKeyAttributeName]: hashKey.toString(10),
+            [this._config.rangeKeyAttributeName]: putPointInput.RangeKeyValue,
+            [this._config.geohashAttributeName]: geohash.toString(10),
+            [this._config.geoJsonAttributeName]: JSON.stringify({
+                type: this._config.geoJsonPointType,
+                coordinates: this._config.longitudeFirst
+                    ? [putPointInput.GeoPoint.longitude, putPointInput.GeoPoint.latitude]
+                    : [putPointInput.GeoPoint.latitude, putPointInput.GeoPoint.longitude],
+            }),
+        };
+        const putItemParams = {
+            Item: {
+                ...item,
+                ...(putPointInput.PutItemInput && putPointInput.PutItemInput.Item),
+            },
             TableName: this._config.tableName,
-        }));
+        };
+        return this._ddbDocClient.send(new lib_dynamodb_1.PutCommand(putItemParams));
     }
     batchWritePoints(putPointInputs) {
         const RequestItems = {};
