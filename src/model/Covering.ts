@@ -1,10 +1,10 @@
-import { CellId } from '@radarlabs/s2';
+import { S2CellId } from 'nodes2ts';
 import { GeohashRange } from './GeohashRange';
 
 export class Covering {
-  private cellIds: CellId[];
+  private cellIds: S2CellId[];
 
-  constructor(cellIds: CellId[]) {
+  constructor(cellIds: S2CellId[]) {
     this.cellIds = cellIds;
   }
 
@@ -12,8 +12,8 @@ export class Covering {
     const ranges: GeohashRange[] = [];
     this.cellIds.forEach(outerRange => {
       const hashRange = new GeohashRange(
-        outerRange.rangeMin().id(),
-        outerRange.rangeMax().id(),
+        outerRange.rangeMin().id,
+        outerRange.rangeMax().id,
       );
       ranges.push(...hashRange.trySplit(hashKeyLength));
     });

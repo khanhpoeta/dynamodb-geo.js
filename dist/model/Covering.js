@@ -9,7 +9,7 @@ class Covering {
     getGeoHashRanges(hashKeyLength) {
         const ranges = [];
         this.cellIds.forEach(outerRange => {
-            const hashRange = new GeohashRange_1.GeohashRange(outerRange.rangeMin().id(), outerRange.rangeMax().id());
+            const hashRange = new GeohashRange_1.GeohashRange(outerRange.rangeMin().id, outerRange.rangeMax().id);
             ranges.push(...hashRange.trySplit(hashKeyLength));
         });
         return ranges;

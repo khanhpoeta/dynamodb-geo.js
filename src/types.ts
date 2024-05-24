@@ -13,8 +13,6 @@ import {
   UpdateCommandOutput,
 } from '@aws-sdk/lib-dynamodb';
 
-import S2 from '@radarlabs/s2';
-
 export interface BatchWritePointOutput
   extends BatchExecuteStatementCommandOutput {}
 
@@ -25,7 +23,10 @@ export interface DeletePointInput {
 }
 export interface DeletePointOutput extends DeleteCommandOutput {}
 
-export class GeoPoint extends S2.LatLng {}
+export interface GeoPoint {
+  latitude: number;
+  longitude: number;
+}
 export interface GeoQueryInput {
   QueryInput?: QueryCommandInput;
 }

@@ -1,7 +1,4 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GeoDataManagerConfiguration = void 0;
 /*
@@ -19,7 +16,7 @@ exports.GeoDataManagerConfiguration = void 0;
  * permissions and limitations under the License.
  */
 const client_dynamodb_1 = require("@aws-sdk/client-dynamodb");
-const s2_1 = __importDefault(require("@radarlabs/s2"));
+const nodes2ts_1 = require("nodes2ts");
 class GeoDataManagerConfiguration {
     constructor(tableName, dynamoDBClient = new client_dynamodb_1.DynamoDBClient({})) {
         this.consistentRead = false;
@@ -51,7 +48,7 @@ class GeoDataManagerConfiguration {
         this.geoJsonPointType = 'Point';
         this.dynamoDBClient = dynamoDBClient;
         this.tableName = tableName;
-        this.S2RegionCoverer = s2_1.default.RegionCoverer;
+        this.S2RegionCoverer = nodes2ts_1.S2RegionCoverer;
     }
 }
 exports.GeoDataManagerConfiguration = GeoDataManagerConfiguration;

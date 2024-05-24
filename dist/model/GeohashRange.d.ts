@@ -1,7 +1,8 @@
+import Long from 'long';
 export declare class GeohashRange {
-    rangeMin: bigint;
-    rangeMax: bigint;
-    constructor(min: bigint | number, max: bigint | number);
+    rangeMin: Long;
+    rangeMax: Long;
+    constructor(min: Long | number, max: Long | number);
     tryMerge(range: GeohashRange): boolean;
-    trySplit(hashKeyLength: number): GeohashRange[];
+    trySplit(hashKeyLength: any): GeohashRange[];
 }

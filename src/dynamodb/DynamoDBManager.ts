@@ -34,6 +34,7 @@ import {
   UpdateCommand,
   DeleteCommand,
 } from '@aws-sdk/lib-dynamodb';
+import Long from 'long';
 
 export class DynamoDBManager {
   _config: GeoDataManagerConfiguration;
@@ -76,7 +77,7 @@ export class DynamoDBManager {
    */
   async queryGeohash(
     queryInput: QueryCommandInput | undefined,
-    hashKey: bigint,
+    hashKey: Long,
     range: GeohashRange,
   ) {
     const queryOutputs: QueryCommandOutput[] = [];

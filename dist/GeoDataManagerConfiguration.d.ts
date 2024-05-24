@@ -1,5 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import S2 from '@radarlabs/s2';
+import { S2RegionCoverer } from 'nodes2ts';
 export declare class GeoDataManagerConfiguration {
     static MERGE_THRESHOLD: number;
     tableName: string;
@@ -31,6 +31,6 @@ export declare class GeoDataManagerConfiguration {
      */
     geoJsonPointType: 'Point' | 'POINT';
     dynamoDBClient: DynamoDBClient;
-    S2RegionCoverer: typeof S2.RegionCoverer;
+    S2RegionCoverer: typeof S2RegionCoverer;
     constructor(tableName: string, dynamoDBClient?: DynamoDBClient);
 }
