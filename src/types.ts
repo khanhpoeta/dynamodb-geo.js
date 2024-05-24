@@ -1,55 +1,61 @@
-import { DynamoDB } from "aws-sdk";
+import {
+  QueryCommandInput,
+  GetCommandInput,
+  PutCommandInput,
+  BatchExecuteStatementCommandOutput,
+  NativeAttributeValue,
+  DeleteCommandInput,
+  DeleteCommandOutput,
+  QueryCommandOutput,
+  GetCommandOutput,
+  PutCommandOutput,
+  UpdateCommandInput,
+  UpdateCommandOutput,
+} from '@aws-sdk/lib-dynamodb';
 
-export interface BatchWritePointOutput extends DynamoDB.BatchWriteItemOutput {
-}
+export interface BatchWritePointOutput
+  extends BatchExecuteStatementCommandOutput {}
 
 export interface DeletePointInput {
-  RangeKeyValue: DynamoDB.AttributeValue;
+  RangeKeyValue: NativeAttributeValue;
   GeoPoint: GeoPoint;
-  DeleteItemInput?: DynamoDB.DeleteItemInput
+  DeleteItemInput?: DeleteCommandInput;
 }
-export interface DeletePointOutput extends DynamoDB.DeleteItemOutput {
-}
+export interface DeletePointOutput extends DeleteCommandOutput {}
 
 export interface GeoPoint {
   latitude: number;
   longitude: number;
 }
 export interface GeoQueryInput {
-  QueryInput?: DynamoDB.QueryInput;
+  QueryInput?: QueryCommandInput;
 }
-export interface GeoQueryOutput extends DynamoDB.QueryOutput {
-}
+export interface GeoQueryOutput extends QueryCommandOutput {}
 export interface GetPointInput {
-  RangeKeyValue: DynamoDB.AttributeValue;
+  RangeKeyValue: NativeAttributeValue;
   GeoPoint: GeoPoint;
-  GetItemInput: DynamoDB.GetItemInput;
+  GetItemInput: GetCommandInput;
 }
-export interface GetPointOutput extends DynamoDB.GetItemOutput {
-}
+export interface GetPointOutput extends GetCommandOutput {}
 export interface PutPointInput {
-  RangeKeyValue: DynamoDB.AttributeValue;
+  RangeKeyValue: NativeAttributeValue;
   GeoPoint: GeoPoint;
-  PutItemInput: DynamoDB.PutRequest;
+  PutItemInput: PutCommandInput;
 }
-export interface PutPointOutput extends DynamoDB.PutItemOutput {
-}
+export interface PutPointOutput extends PutCommandOutput {}
 export interface QueryRadiusInput extends GeoQueryInput {
   RadiusInMeter: number;
   CenterPoint: GeoPoint;
 }
-export interface QueryRadiusOutput extends GeoQueryOutput {
-}
+export interface QueryRadiusOutput extends GeoQueryOutput {}
 export interface QueryRectangleInput extends GeoQueryInput {
   MinPoint: GeoPoint;
   MaxPoint: GeoPoint;
 }
-export interface QueryRectangleOutput extends GeoQueryOutput {
-}
+export interface QueryRectangleOutput extends GeoQueryOutput {}
 export interface UpdatePointInput {
-  RangeKeyValue: DynamoDB.AttributeValue;
+  RangeKeyValue: NativeAttributeValue;
   GeoPoint: GeoPoint;
-  UpdateItemInput: DynamoDB.UpdateItemInput;
+  UpdateItemInput: UpdateCommandInput;
 }
-export interface UpdatePointOutput extends DynamoDB.UpdateItemOutput {
-}
+export interface UpdatePointOutput extends UpdateCommandOutput {}

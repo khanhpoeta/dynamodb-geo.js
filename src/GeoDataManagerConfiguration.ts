@@ -12,11 +12,10 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-import { DynamoDB } from "aws-sdk";
-import { S2RegionCoverer } from "nodes2ts";
+import { S2RegionCoverer } from 'nodes2ts';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 
 export class GeoDataManagerConfiguration {
-
   // Public constants
   static MERGE_THRESHOLD = 2;
 
@@ -25,12 +24,12 @@ export class GeoDataManagerConfiguration {
 
   consistentRead: boolean = false;
 
-  hashKeyAttributeName: string = "hashKey";
-  rangeKeyAttributeName: string = "rangeKey";
-  geohashAttributeName: string = "geohash";
-  geoJsonAttributeName: string = "geoJson";
+  hashKeyAttributeName: string = 'hashKey';
+  rangeKeyAttributeName: string = 'rangeKey';
+  geohashAttributeName: string = 'geohash';
+  geoJsonAttributeName: string = 'geoJson';
 
-  geohashIndexName: string = "geohash-index";
+  geohashIndexName: string = 'geohash-index';
 
   hashKeyLength: number = 2;
 
@@ -56,11 +55,14 @@ export class GeoDataManagerConfiguration {
    */
   geoJsonPointType: 'Point' | 'POINT' = 'Point';
 
-  dynamoDBClient: DynamoDB;
+  dynamoDBClient: DynamoDBClient;
 
   S2RegionCoverer: typeof S2RegionCoverer;
 
-  constructor(dynamoDBClient, tableName: string) {
+  constructor(
+    tableName: string,
+    dynamoDBClient: DynamoDBClient = new DynamoDBClient({}),
+  ) {
     this.dynamoDBClient = dynamoDBClient;
     this.tableName = tableName;
     this.S2RegionCoverer = S2RegionCoverer;

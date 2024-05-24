@@ -22,13 +22,15 @@
     "@types/chai": "^4.0.0",
     "@types/mocha": "^2.2.41",
     "@types/node": "^7.0.27",
-    "aws-sdk": "^2.248.1",
+    "@aws-sdk/client-dynamodb": "^3.583.0",
+    "@aws-sdk/lib-dynamodb": "^3.583.0",
     "chai": "^4.0.1",
     "mocha": "^3.3.0",
     "ts-node": "^3.0.2",
     "typescript": "^2.3.4"
   },
   "peerDependencies": {
-    "aws-sdk": "^2.176.0"
+    "@aws-sdk/client-dynamodb": "^3.583.0",
+    "@aws-sdk/lib-dynamodb": "^3.583.0"
   }
 }
