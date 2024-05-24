@@ -2,19 +2,23 @@ import { QueryRadiusInput, QueryRectangleInput } from "../types";
 import { S2LatLng, S2LatLngRect } from "nodes2ts";
 
 export class S2Util {
-	public static latLngRectFromQueryRectangleInput(geoQueryRequest: QueryRectangleInput): S2LatLngRect {
+	public static latLngRectFromQueryRectangleInput(geoQueryRequest: QueryRectangleInput): S2LatLngRect | null{
 		const queryRectangleRequest = geoQueryRequest as QueryRectangleInput;
 
 		const minPoint = queryRectangleRequest.MinPoint;
 		const maxPoint = queryRectangleRequest.MaxPoint;
 
-		let latLngRect: S2LatLngRect = null;
+		let latLngRect: S2LatLngRect | null = null;
 
 		if (minPoint != null && maxPoint != null) {
 			const minLatLng = S2LatLng.fromDegrees(minPoint.latitude, minPoint.longitude);
 			const maxLatLng = S2LatLng.fromDegrees(maxPoint.latitude, maxPoint.longitude);
 
 			latLngRect = S2LatLngRect.fromLatLng(minLatLng, maxLatLng);
+		}
+		if(!latLngRect)
+		{
+			throw Error(`Can not convert geoQuery`);
 		}
 
 		return latLngRect;

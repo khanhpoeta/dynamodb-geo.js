@@ -1,18 +1,18 @@
 {
+    "display": "DynamoDB Geo",
     "compilerOptions": {
-        "module": "commonjs",
-        "target": "es5",
-        "noImplicitAny": false,
-        "sourceMap": false,
-        "outDir": "dist",
-        "skipLibCheck": true,
-        "lib": [
-            "es2015"
-        ],
+    "target": "esnext",
+      "module": "commonjs",
+      "lib": ["es2020"],
+      "noImplicitAny": false,
+      "rootDir": "./src" /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
+      "outDir": "dist" /* Redirect output structure to the directory. */,
+      "strict": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "paths": {
+        "@/*": ["./src/*"]
+      }
     },
-    "include": [ "src/**/*" ],
-    "exclude": [
-        "node_modules",
-        "dist/**/*",
-      ]
-}
+    "exclude": ["dist", "test"]
+  }

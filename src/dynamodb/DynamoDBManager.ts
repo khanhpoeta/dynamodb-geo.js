@@ -22,7 +22,6 @@ import {
 } from '../types';
 import { S2Manager } from '../s2/S2Manager';
 import { GeohashRange } from '../model/GeohashRange';
-import * as Long from 'long';
 import {
   DynamoDBDocumentClient,
   QueryCommand,
@@ -36,6 +35,7 @@ import {
   UpdateCommand,
   DeleteCommand,
 } from '@aws-sdk/lib-dynamodb';
+import Long from 'long';
 
 export class DynamoDBManager {
   _config: GeoDataManagerConfiguration;
@@ -65,9 +65,7 @@ export class DynamoDBManager {
   ) {
     const queryOutputs: QueryCommandOutput[] = [];
 
-    const nextQuery = async (
-      lastEvaluatedKey: Record<string, NativeAttributeValue> = null,
-    ) => {
+    const nextQuery = async (lastEvaluatedKey?: Record<string, any>) => {
       const input = { KeyConditions: {} };
       input.KeyConditions[this._config.hashKeyAttributeName] = {
         ComparisonOperator: 'EQ',
@@ -85,9 +83,9 @@ export class DynamoDBManager {
         ReturnConsumedCapacity: 'TOTAL',
         FilterExpression:
           'geohash BETWEEN :minRange AND :maxRange' +
-          (queryInput.FilterExpression || ''),
+          (queryInput?.FilterExpression || ''),
         ExpressionAttributeValues: {
-          ...queryInput.ExpressionAttributeValues,
+          ...queryInput?.ExpressionAttributeValues,
           ':minRange': minRange,
           ':maxRange': maxRange,
         },
@@ -140,7 +138,7 @@ export class DynamoDBManager {
       geohash,
       this._config.hashKeyLength,
     );
-    const putItemInput = putPointInput.PutItemInput || { Item: {} };
+    const putItemInput = putPointInput.PutItemInput.Item || { Item: {} };
 
     putItemInput.Item[this._config.hashKeyAttributeName] = hashKey.toString(10);
     putItemInput.Item[this._config.rangeKeyAttributeName] =

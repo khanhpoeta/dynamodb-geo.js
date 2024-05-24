@@ -190,12 +190,15 @@ export class GeoDataManager {
    * @return Result of rectangle query request.
    */
   public async queryRectangle(queryRectangleInput: QueryRectangleInput) {
-    const latLngRect: S2LatLngRect = S2Util.latLngRectFromQueryRectangleInput(queryRectangleInput);
-
+    const latLngRect = S2Util.latLngRectFromQueryRectangleInput(queryRectangleInput);
+if(latLngRect)
+  {
     const covering = new Covering(new this.config.S2RegionCoverer().getCoveringCells(latLngRect));
 
     const results = await this.dispatchQueries(covering, queryRectangleInput);
     return this.filterByRectangle(results, queryRectangleInput);
+  }
+    return [];
   }
 
   /**
@@ -305,8 +308,13 @@ export class GeoDataManager {
     });
 
     const results: QueryCommandOutput[][] = await Promise.all(promises);
-    const mergedResults = [];
-    results.forEach(queryOutputs => queryOutputs.forEach(queryOutput => mergedResults.push(...queryOutput.Items)));
+    const mergedResults:Record<string,any>[] = []
+    results.forEach(queryOutputs => queryOutputs.forEach(queryOutput => {
+      if(queryOutput.Items)
+        {
+          mergedResults.push(...queryOutput.Items)
+        }
+    }));
     return mergedResults;
   }
 
@@ -318,11 +326,10 @@ export class GeoDataManager {
    * @returns DynamoDB.ItemList
    */
   private filterByRadius(list: Record<string, NativeAttributeValue>[], geoQueryInput: QueryRadiusInput) {
-    let centerLatLng: S2LatLng = null;
     let radiusInMeter = 0;
 
     const centerPoint: GeoPoint = (geoQueryInput as QueryRadiusInput).CenterPoint;
-    centerLatLng = S2LatLng.fromDegrees(centerPoint.latitude, centerPoint.longitude);
+    const centerLatLng = S2LatLng.fromDegrees(centerPoint.latitude, centerPoint.longitude);
     radiusInMeter = (geoQueryInput as QueryRadiusInput).RadiusInMeter;
 
 
@@ -345,16 +352,19 @@ export class GeoDataManager {
    * @returns DynamoDB.ItemList
    */
   private filterByRectangle(list: Record<string, NativeAttributeValue>[], geoQueryInput: QueryRectangleInput): Record<string, NativeAttributeValue>[] {
-    const latLngRect: S2LatLngRect = S2Util.latLngRectFromQueryRectangleInput(geoQueryInput);
-
-    return list.filter(item => {
-      const geoJson: string = item[this.config.geoJsonAttributeName].S;
-      const coordinates = JSON.parse(geoJson).coordinates;
-      const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
-      const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
-
-      const latLng: S2LatLng = S2LatLng.fromDegrees(latitude, longitude);
-      return latLngRect.containsLL(latLng);
-    });
+    const latLngRect = S2Util.latLngRectFromQueryRectangleInput(geoQueryInput);
+    if(latLngRect)
+      {
+        return list.filter(item => {
+          const geoJson: string = item[this.config.geoJsonAttributeName].S;
+          const coordinates = JSON.parse(geoJson).coordinates;
+          const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
+          const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
+    
+          const latLng: S2LatLng = S2LatLng.fromDegrees(latitude, longitude);
+          return latLngRect.containsLL(latLng);
+        });
+      }
+    return [];
   }
 }
