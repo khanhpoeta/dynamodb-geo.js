@@ -89,15 +89,15 @@ export class DynamoDBManager {
         AttributeValueList: [hashKey.toInt()],
       };
 
-      const minRange = range.rangeMin.toInt();
-      const maxRange = range.rangeMax.toInt();
-      const ranges = [minRange, maxRange];
-      console.log('hashKey', hashKey.toInt());
-      console.log('ranges', ranges);
-      input.KeyConditions[this._config.geohashAttributeName] = {
-        ComparisonOperator: 'BETWEEN',
-        AttributeValueList: [Math.min(...ranges), Math.max(...ranges)],
-      };
+      // const minRange = range.rangeMin.toInt();
+      // const maxRange = range.rangeMax.toInt();
+      // const ranges = [minRange, maxRange];
+      // console.log('hashKey', hashKey.toInt());
+      // console.log('ranges', ranges);
+      // input.KeyConditions[this._config.geohashAttributeName] = {
+      //   ComparisonOperator: 'BETWEEN',
+      //   AttributeValueList: [Math.min(...ranges), Math.max(...ranges)],
+      // };
 
       const defaults: QueryCommandInput = {
         TableName: this._config.tableName,
