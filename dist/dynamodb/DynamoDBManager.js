@@ -53,10 +53,11 @@ class DynamoDBManager {
             const input = { KeyConditions: {} };
             input.KeyConditions[this._config.hashKeyAttributeName] = {
                 ComparisonOperator: 'EQ',
-                AttributeValueList: [new Number(hashKey.toString(10))],
+                AttributeValueList: [hashKey.toInt()],
             };
-            const minRange = new Number(range.rangeMin.toString(10));
-            const maxRange = new Number(range.rangeMax.toString(10));
+            const minRange = range.rangeMin.toInt();
+            const maxRange = range.rangeMax.toInt();
+            console.log('hashKey', hashKey.toInt());
             console.log('minRange', minRange);
             console.log('maxRange', maxRange);
             input.KeyConditions[this._config.geohashAttributeName] = {
@@ -109,9 +110,9 @@ class DynamoDBManager {
         const geohash = S2Manager_1.S2Manager.generateGeohash(putPointInput.GeoPoint);
         const hashKey = S2Manager_1.S2Manager.generateHashKey(geohash, this._config.hashKeyLength);
         const item = {
-            [this._config.hashKeyAttributeName]: new Number(hashKey.toString(10)),
+            [this._config.hashKeyAttributeName]: hashKey.toInt(),
             [this._config.rangeKeyAttributeName]: putPointInput.RangeKeyValue,
-            [this._config.geohashAttributeName]: new Number(geohash.toString(10)),
+            [this._config.geohashAttributeName]: geohash.toInt(),
             [this._config.geoJsonAttributeName]: JSON.stringify({
                 type: this._config.geoJsonPointType,
                 coordinates: this._config.longitudeFirst
