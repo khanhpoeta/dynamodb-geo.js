@@ -83,29 +83,29 @@ export class DynamoDBManager {
     const queryOutputs: QueryCommandOutput[] = [];
 
     const nextQuery = async (lastEvaluatedKey?: Record<string, any>) => {
-      const input = { KeyConditions: {} };
-      input.KeyConditions[this._config.hashKeyAttributeName] = {
-        ComparisonOperator: 'EQ',
-        AttributeValueList: [hashKey.toInt()],
-      };
-
       const minRange = range.rangeMin.high;
       const maxRange = range.rangeMax.high;
       const ranges = [minRange, maxRange];
       console.log('hashKey', hashKey.toInt());
       console.log('range.rangeMax', JSON.stringify(range));
       console.log('ranges', ranges);
-      input.KeyConditions[this._config.geohashAttributeName] = {
-        ComparisonOperator: 'BETWEEN',
-        AttributeValueList: [Math.min(...ranges), Math.max(...ranges)],
-      };
 
       const defaults: QueryCommandInput = {
         TableName: this._config.tableName,
-        KeyConditions: input.KeyConditions,
+        KeyConditionExpression: '#id = :id AND #geohash BETWEEN :min AND :max',
+        ExpressionAttributeNames: {
+          '#id': 'id',
+          '#geohash': this._config.geohashAttributeName,
+        },
+        ExpressionAttributeValues: {
+          ':id': hashKey.toInt(),
+          ':min': Math.min(...ranges),
+          ':max': Math.max(...ranges),
+        },
         IndexName: this._config.geohashIndexName,
         ConsistentRead: this._config.consistentRead,
         ReturnConsumedCapacity: 'TOTAL',
+        FilterExpression: '',
         ExclusiveStartKey: lastEvaluatedKey,
       };
       if (
