@@ -32,36 +32,31 @@ export class S2Util {
     geoQueryRequest: QueryRadiusInput,
   ): S2LatLngRect {
     const centerPoint = geoQueryRequest.CenterPoint;
+    const { latitude, longitude } = centerPoint;
     const radiusInMeter = geoQueryRequest.RadiusInMeter;
 
-    const centerLatLng = S2LatLng.fromDegrees(
-      centerPoint.latitude,
-      centerPoint.longitude,
-    );
+    const centerLatLng = S2LatLng.fromDegrees(latitude, longitude);
 
-    const latReferenceUnit = centerPoint.latitude > 0.0 ? -1.0 : 1.0;
-    const latReferenceLatLng = S2LatLng.fromDegrees(
-      centerPoint.latitude + latReferenceUnit,
-      centerPoint.longitude,
-    );
-    const lngReferenceUnit = centerPoint.longitude > 0.0 ? -1.0 : 1.0;
-    const lngReferenceLatLng = S2LatLng.fromDegrees(
-      centerPoint.latitude,
-      centerPoint.longitude + lngReferenceUnit,
-    );
+    // Reference points for distance calculations
+    const latReferenceLatLng = S2LatLng.fromDegrees(latitude + 1.0, longitude);
+    const lngReferenceLatLng = S2LatLng.fromDegrees(latitude, longitude + 1.0);
 
-    const latForRadius =
-      radiusInMeter / centerLatLng.getEarthDistance(latReferenceLatLng);
-    const lngForRadius =
-      radiusInMeter / centerLatLng.getEarthDistance(lngReferenceLatLng);
+    // Calculate distances
+    const latDistance = centerLatLng.getEarthDistance(latReferenceLatLng);
+    const lngDistance = centerLatLng.getEarthDistance(lngReferenceLatLng);
 
+    // Calculate the latitude and longitude span
+    const latSpan = radiusInMeter / latDistance;
+    const lngSpan = radiusInMeter / lngDistance;
+
+    // Determine min and max latitudes and longitudes
     const minLatLng = S2LatLng.fromDegrees(
-      centerPoint.latitude - latForRadius,
-      centerPoint.longitude - lngForRadius,
+      latitude - latSpan,
+      longitude - lngSpan,
     );
     const maxLatLng = S2LatLng.fromDegrees(
-      centerPoint.latitude + latForRadius,
-      centerPoint.longitude + lngForRadius,
+      latitude + latSpan,
+      longitude + lngSpan,
     );
 
     return S2LatLngRect.fromLatLng(minLatLng, maxLatLng);
