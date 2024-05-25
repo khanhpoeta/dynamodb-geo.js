@@ -71,7 +71,6 @@ class DynamoDBManager {
                 IndexName: this._config.geohashIndexName,
                 ConsistentRead: this._config.consistentRead,
                 ReturnConsumedCapacity: 'TOTAL',
-                FilterExpression: '',
                 ExclusiveStartKey: lastEvaluatedKey,
             };
             if (queryInput?.FilterExpression &&
