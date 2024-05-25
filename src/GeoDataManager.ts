@@ -348,8 +348,6 @@ export class GeoDataManager {
     list: Record<string, any>[],
     geoQueryInput: QueryRadiusInput,
   ) {
-    let radiusInMeter = 0;
-
     const centerPoint: GeoPoint = (geoQueryInput as QueryRadiusInput)
       .CenterPoint;
 
@@ -358,7 +356,7 @@ export class GeoDataManager {
       centerPoint.longitude,
     );
 
-    radiusInMeter = (geoQueryInput as QueryRadiusInput).RadiusInMeter;
+    const radiusInMeter = (geoQueryInput as QueryRadiusInput).RadiusInMeter;
     const region = Utils.calcRegionFromCenterRadius(
       centerLatLng,
       radiusInMeter / 1000,
@@ -371,8 +369,9 @@ export class GeoDataManager {
       const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
       const latLng = S2LatLng.fromDegrees(latitude, longitude);
       const cell = S2Cell.fromLatLng(latLng);
-
-      return region.containsC(cell);
+      const distance = latLng.getEarthDistance(centerLatLng);
+      item['distance'] = distance;
+      return true;
     });
   }
 

@@ -303,11 +303,10 @@ class GeoDataManager {
      * @returns DynamoDB.ItemList
      */
     filterByRadius(list, geoQueryInput) {
-        let radiusInMeter = 0;
         const centerPoint = geoQueryInput
             .CenterPoint;
         const centerLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude, centerPoint.longitude);
-        radiusInMeter = geoQueryInput.RadiusInMeter;
+        const radiusInMeter = geoQueryInput.RadiusInMeter;
         const region = nodes2ts_1.Utils.calcRegionFromCenterRadius(centerLatLng, radiusInMeter / 1000);
         return list.filter(item => {
             const geoJson = item[this.config.geoJsonAttributeName];
@@ -316,7 +315,9 @@ class GeoDataManager {
             const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
             const latLng = nodes2ts_1.S2LatLng.fromDegrees(latitude, longitude);
             const cell = nodes2ts_1.S2Cell.fromLatLng(latLng);
-            return region.containsC(cell);
+            const distance = latLng.getEarthDistance(centerLatLng);
+            item['distance'] = distance;
+            return true;
         });
     }
     /**
