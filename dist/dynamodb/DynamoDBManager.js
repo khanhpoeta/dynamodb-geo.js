@@ -53,9 +53,6 @@ class DynamoDBManager {
             const minRange = range.rangeMin.high;
             const maxRange = range.rangeMax.high;
             const ranges = [minRange, maxRange];
-            console.log('hashKey', hashKey.toInt());
-            console.log('range.rangeMax', JSON.stringify(range));
-            console.log('ranges', ranges);
             const defaults = {
                 TableName: this._config.tableName,
                 KeyConditionExpression: '#id = :id AND #geohash BETWEEN :min AND :max',
@@ -81,7 +78,6 @@ class DynamoDBManager {
             }
             const queryOutput = await this._ddbDocClient.send(new lib_dynamodb_1.QueryCommand(defaults));
             queryOutputs.push(queryOutput);
-            console.log('results: ', queryOutput);
             if (queryOutput.LastEvaluatedKey) {
                 return nextQuery(queryOutput.LastEvaluatedKey);
             }

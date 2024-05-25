@@ -27,11 +27,7 @@ import {
 import { S2Manager } from './s2/S2Manager';
 import { S2Util } from './s2/S2Util';
 import { Covering } from './model/Covering';
-import { S2LatLng, S2LatLngRect } from 'nodes2ts';
-import {
-  NativeAttributeValue,
-  QueryCommandOutput,
-} from '@aws-sdk/lib-dynamodb';
+import { S2Cell, S2LatLng, S2LatLngRect, Utils } from 'nodes2ts';
 
 /**
  * <p>
@@ -313,7 +309,7 @@ export class GeoDataManager {
     covering: Covering,
     geoQueryInput: GeoQueryInput,
   ) {
-    const promises: Promise<QueryCommandOutput[]>[] = covering
+    const promises = covering
       .getGeoHashRanges(this.config.hashKeyLength)
       .map(range => {
         const hashKey = S2Manager.generateHashKey(
@@ -329,13 +325,15 @@ export class GeoDataManager {
 
     const results = await Promise.all(promises);
     const mergedResults: Record<string, any>[] = [];
-    results.forEach(queryOutputs =>
-      queryOutputs.forEach(queryOutput => {
+    console.log('results', results);
+    for (const queryOutputs of results) {
+      for (const queryOutput of queryOutputs) {
         if (queryOutput.Items) {
           mergedResults.push(...queryOutput.Items);
         }
-      }),
-    );
+      }
+    }
+    console.log('mergedResults', mergedResults);
     return mergedResults;
   }
 
@@ -354,20 +352,27 @@ export class GeoDataManager {
 
     const centerPoint: GeoPoint = (geoQueryInput as QueryRadiusInput)
       .CenterPoint;
+
     const centerLatLng = S2LatLng.fromDegrees(
       centerPoint.latitude,
       centerPoint.longitude,
     );
+
     radiusInMeter = (geoQueryInput as QueryRadiusInput).RadiusInMeter;
+    const region = Utils.calcRegionFromCenterRadius(
+      centerLatLng,
+      radiusInMeter / 1000,
+    );
 
     return list.filter(item => {
       const geoJson: string = item[this.config.geoJsonAttributeName];
       const coordinates = JSON.parse(geoJson).coordinates;
       const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
       const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
+      const latLng = S2LatLng.fromDegrees(latitude, longitude);
+      const cell = S2Cell.fromLatLng(latLng);
 
-      const latLng: S2LatLng = S2LatLng.fromDegrees(latitude, longitude);
-      return centerLatLng.getEarthDistance(latLng) <= radiusInMeter;
+      return region.containsC(cell);
     });
   }
 

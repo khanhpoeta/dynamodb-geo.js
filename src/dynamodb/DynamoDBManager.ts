@@ -86,9 +86,6 @@ export class DynamoDBManager {
       const minRange = range.rangeMin.high;
       const maxRange = range.rangeMax.high;
       const ranges = [minRange, maxRange];
-      console.log('hashKey', hashKey.toInt());
-      console.log('range.rangeMax', JSON.stringify(range));
-      console.log('ranges', ranges);
 
       const defaults: QueryCommandInput = {
         TableName: this._config.tableName,
@@ -120,7 +117,7 @@ export class DynamoDBManager {
         new QueryCommand(defaults),
       );
       queryOutputs.push(queryOutput);
-      console.log('results: ', queryOutput);
+
       if (queryOutput.LastEvaluatedKey) {
         return nextQuery(queryOutput.LastEvaluatedKey);
       }

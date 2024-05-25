@@ -284,11 +284,15 @@ class GeoDataManager {
         });
         const results = await Promise.all(promises);
         const mergedResults = [];
-        results.forEach(queryOutputs => queryOutputs.forEach(queryOutput => {
-            if (queryOutput.Items) {
-                mergedResults.push(...queryOutput.Items);
+        console.log('results', results);
+        for (const queryOutputs of results) {
+            for (const queryOutput of queryOutputs) {
+                if (queryOutput.Items) {
+                    mergedResults.push(...queryOutput.Items);
+                }
             }
-        }));
+        }
+        console.log('mergedResults', mergedResults);
         return mergedResults;
     }
     /**
@@ -304,13 +308,15 @@ class GeoDataManager {
             .CenterPoint;
         const centerLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude, centerPoint.longitude);
         radiusInMeter = geoQueryInput.RadiusInMeter;
+        const region = nodes2ts_1.Utils.calcRegionFromCenterRadius(centerLatLng, radiusInMeter / 1000);
         return list.filter(item => {
             const geoJson = item[this.config.geoJsonAttributeName];
             const coordinates = JSON.parse(geoJson).coordinates;
             const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
             const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
             const latLng = nodes2ts_1.S2LatLng.fromDegrees(latitude, longitude);
-            return centerLatLng.getEarthDistance(latLng) <= radiusInMeter;
+            const cell = nodes2ts_1.S2Cell.fromLatLng(latLng);
+            return region.containsC(cell);
         });
     }
     /**
