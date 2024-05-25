@@ -19,18 +19,14 @@ class S2Util {
         const centerPoint = geoQueryRequest.CenterPoint;
         const radiusInMeter = geoQueryRequest.RadiusInMeter;
         const centerLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude, centerPoint.longitude);
-        // Reference points for distance calculations
-        const latReferenceLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude + 1.0, centerPoint.longitude);
-        const lngReferenceLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude, centerPoint.longitude + 1.0);
-        // Calculate distances
-        const latDistance = centerLatLng.getEarthDistance(latReferenceLatLng);
-        const lngDistance = centerLatLng.getEarthDistance(lngReferenceLatLng);
-        // Calculate the latitude and longitude span
-        const latSpan = radiusInMeter / latDistance;
-        const lngSpan = radiusInMeter / lngDistance;
-        // Determine min and max latitudes and longitudes
-        const minLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude - latSpan, centerPoint.longitude - lngSpan);
-        const maxLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude + latSpan, centerPoint.longitude + lngSpan);
+        const latReferenceUnit = centerPoint.latitude > 0.0 ? -1.0 : 1.0;
+        const latReferenceLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude + latReferenceUnit, centerPoint.longitude);
+        const lngReferenceUnit = centerPoint.longitude > 0.0 ? -1.0 : 1.0;
+        const lngReferenceLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude, centerPoint.longitude + lngReferenceUnit);
+        const latForRadius = radiusInMeter / centerLatLng.getEarthDistance(latReferenceLatLng);
+        const lngForRadius = radiusInMeter / centerLatLng.getEarthDistance(lngReferenceLatLng);
+        const minLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude - latForRadius, centerPoint.longitude - lngForRadius);
+        const maxLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude + latForRadius, centerPoint.longitude + lngForRadius);
         return nodes2ts_1.S2LatLngRect.fromLatLng(minLatLng, maxLatLng);
     }
 }
