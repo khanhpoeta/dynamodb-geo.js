@@ -32,7 +32,12 @@ class S2Util {
         // Determine min and max latitudes and longitudes
         const minLatLng = nodes2ts_1.S2LatLng.fromDegrees(latitude - latSpan, longitude - lngSpan);
         const maxLatLng = nodes2ts_1.S2LatLng.fromDegrees(latitude + latSpan, longitude + lngSpan);
-        return nodes2ts_1.S2LatLngRect.fromLatLng(minLatLng, maxLatLng);
+        const region = nodes2ts_1.Utils.calcRegionFromCenterRadius(centerLatLng, geoQueryRequest.RadiusInMeter / 1000);
+        const rectBound = region.getRectBound();
+        const rect = nodes2ts_1.S2LatLngRect.fromLatLng(minLatLng, maxLatLng);
+        console.info('rectBound', rectBound);
+        console.info('rect', rect);
+        return rect;
     }
 }
 exports.S2Util = S2Util;
