@@ -80,9 +80,8 @@ class DynamoDBManager {
                     queryInput.ExpressionAttributeValues;
             }
             const queryOutput = await this._ddbDocClient.send(new lib_dynamodb_1.QueryCommand(defaults));
-            if (queryOutput.Items) {
-                queryOutputs.push(queryOutput);
-            }
+            queryOutputs.push(queryOutput);
+            console.log('results: ', queryOutput);
             if (queryOutput.LastEvaluatedKey) {
                 return nextQuery(queryOutput.LastEvaluatedKey);
             }
