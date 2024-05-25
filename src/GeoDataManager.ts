@@ -233,7 +233,7 @@ export class GeoDataManager {
     );
 
     const results = await this.dispatchQueries(covering, queryRadiusInput);
-    return this.filterByRadius(results, queryRadiusInput);
+    return this.mapDistance(results, queryRadiusInput);
   }
 
   /**
@@ -335,6 +335,35 @@ export class GeoDataManager {
     }
     console.log('mergedResults', mergedResults);
     return mergedResults;
+  }
+
+  /**
+   * Add distance to the output.
+   *
+   * @param list
+   * @param geoQueryInput
+   * @returns DynamoDB.ItemList
+   */
+  private mapDistance(
+    list: Record<string, any>[],
+    geoQueryInput: QueryRadiusInput,
+  ) {
+    const centerPoint: GeoPoint = (geoQueryInput as QueryRadiusInput)
+      .CenterPoint;
+
+    const centerLatLng = S2LatLng.fromDegrees(
+      centerPoint.latitude,
+      centerPoint.longitude,
+    );
+    return list.map(item => {
+      const geoJson: string = item[this.config.geoJsonAttributeName];
+      const coordinates = JSON.parse(geoJson).coordinates;
+      const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
+      const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
+      const latLng = S2LatLng.fromDegrees(latitude, longitude);
+      const distance = latLng.getEarthDistance(centerLatLng);
+      return { ...item, distance };
+    });
   }
 
   /**

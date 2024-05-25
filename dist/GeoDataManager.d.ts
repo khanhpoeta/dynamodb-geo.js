@@ -165,7 +165,9 @@ export declare class GeoDataManager {
      *
      * @return Result of radius query request.
      * */
-    queryRadius(queryRadiusInput: QueryRadiusInput): Promise<Record<string, any>[]>;
+    queryRadius(queryRadiusInput: QueryRadiusInput): Promise<{
+        distance: number;
+    }[]>;
     /**
      * <p>
      * Update a point data in Amazon DynamoDB table. You cannot update attributes specified in
@@ -230,6 +232,14 @@ export declare class GeoDataManager {
      * @return Aggregated and filtered items returned from Amazon DynamoDB.
      */
     private dispatchQueries;
+    /**
+     * Add distance to the output.
+     *
+     * @param list
+     * @param geoQueryInput
+     * @returns DynamoDB.ItemList
+     */
+    private mapDistance;
     /**
      * Filter out any points outside of the queried area from the input list.
      *

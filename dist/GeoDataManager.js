@@ -206,7 +206,7 @@ class GeoDataManager {
         const latLngRect = S2Util_1.S2Util.getBoundingLatLngRectFromQueryRadiusInput(queryRadiusInput);
         const covering = new Covering_1.Covering(new this.config.S2RegionCoverer().getCoveringCells(latLngRect));
         const results = await this.dispatchQueries(covering, queryRadiusInput);
-        return this.filterByRadius(results, queryRadiusInput);
+        return this.mapDistance(results, queryRadiusInput);
     }
     /**
      * <p>
@@ -294,6 +294,27 @@ class GeoDataManager {
         }
         console.log('mergedResults', mergedResults);
         return mergedResults;
+    }
+    /**
+     * Add distance to the output.
+     *
+     * @param list
+     * @param geoQueryInput
+     * @returns DynamoDB.ItemList
+     */
+    mapDistance(list, geoQueryInput) {
+        const centerPoint = geoQueryInput
+            .CenterPoint;
+        const centerLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude, centerPoint.longitude);
+        return list.map(item => {
+            const geoJson = item[this.config.geoJsonAttributeName];
+            const coordinates = JSON.parse(geoJson).coordinates;
+            const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
+            const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
+            const latLng = nodes2ts_1.S2LatLng.fromDegrees(latitude, longitude);
+            const distance = latLng.getEarthDistance(centerLatLng);
+            return { ...item, distance };
+        });
     }
     /**
      * Filter out any points outside of the queried area from the input list.
