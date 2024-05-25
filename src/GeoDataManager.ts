@@ -231,12 +231,10 @@ export class GeoDataManager {
     const covering = new Covering(
       new this.config.S2RegionCoverer().getCoveringCells(latLngRect),
     );
-
     const results = await this.dispatchQueries(covering, queryRadiusInput);
-    const result2 = this.mapDistance(results, queryRadiusInput);
-    console.log('mergedResults', results);
-    console.log('result2', result2);
-    return result2;
+    return this.mapDistance(results, queryRadiusInput).sort(
+      (a, b) => a.distance - b.distance,
+    );
   }
 
   /**
