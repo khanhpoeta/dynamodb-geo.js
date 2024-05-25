@@ -1,14 +1,14 @@
-import Long from 'long';
 import { GeoDataManagerConfiguration } from '../GeoDataManagerConfiguration';
 import { S2Manager } from '../s2/S2Manager';
+import Long from 'long';
 
 export class GeohashRange {
   rangeMin: Long;
   rangeMax: Long;
 
-  constructor(min: Long | number, max: Long | number) {
-    this.rangeMin = Long.isLong(min) ? <Long>min : Long.fromNumber(<number>min);
-    this.rangeMax = Long.isLong(max) ? <Long>max : Long.fromNumber(<number>max);
+  constructor(min: Long, max: Long) {
+    this.rangeMin = min instanceof Long ? min : Long.fromNumber(min);
+    this.rangeMax = max instanceof Long ? max : Long.fromNumber(max);
   }
 
   public tryMerge(range: GeohashRange): boolean {
