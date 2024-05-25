@@ -25,14 +25,16 @@ export class S2Manager {
     return cellId.id;
   }
 
-  public static generateHashKey(geohash: Long, hashKeyLength: number) {
-    if (geohash.lessThan(0)) {
-      // Counteract "-" at beginning of geohash.
+  public static generateHashKey(geohash: Long, hashKeyLength: number): Long {
+    if (geohash.isNegative()) {
+      // Counteract "-" at the beginning of geohash.
       hashKeyLength++;
     }
 
     const geohashString = geohash.toString(10);
-    const denominator = Math.pow(10, geohashString.length - hashKeyLength);
+    const denominator = Long.fromNumber(
+      Math.pow(10, geohashString.length - hashKeyLength),
+    );
     return geohash.divide(denominator);
   }
 }

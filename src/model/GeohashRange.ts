@@ -82,9 +82,11 @@ export class GeohashRange {
     const minHashKey = S2Manager.generateHashKey(this.rangeMin, hashKeyLength);
     const maxHashKey = S2Manager.generateHashKey(this.rangeMax, hashKeyLength);
 
-    const denominator = Math.pow(
-      10,
-      this.rangeMin.toString().length - minHashKey.toString().length,
+    const denominator = Long.fromNumber(
+      Math.pow(
+        10,
+        this.rangeMin.toString().length - minHashKey.toString().length,
+      ),
     );
 
     if (minHashKey.equals(maxHashKey)) {

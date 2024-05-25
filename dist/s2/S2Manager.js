@@ -13,9 +13,13 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.S2Manager = void 0;
 const nodes2ts_1 = require("nodes2ts");
+const long_1 = __importDefault(require("long"));
 class S2Manager {
     static generateGeohash(geoPoint) {
         const latLng = nodes2ts_1.S2LatLng.fromDegrees(geoPoint.latitude, geoPoint.longitude);
@@ -24,12 +28,12 @@ class S2Manager {
         return cellId.id;
     }
     static generateHashKey(geohash, hashKeyLength) {
-        if (geohash.lessThan(0)) {
-            // Counteract "-" at beginning of geohash.
+        if (geohash.isNegative()) {
+            // Counteract "-" at the beginning of geohash.
             hashKeyLength++;
         }
         const geohashString = geohash.toString(10);
-        const denominator = Math.pow(10, geohashString.length - hashKeyLength);
+        const denominator = long_1.default.fromNumber(Math.pow(10, geohashString.length - hashKeyLength));
         return geohash.divide(denominator);
     }
 }
