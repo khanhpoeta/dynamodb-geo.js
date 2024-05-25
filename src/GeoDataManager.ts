@@ -233,7 +233,10 @@ export class GeoDataManager {
     );
 
     const results = await this.dispatchQueries(covering, queryRadiusInput);
-    return this.mapDistance(results, queryRadiusInput);
+    const result2 = this.mapDistance(results, queryRadiusInput);
+    console.log('mergedResults', results);
+    console.log('result2', result2);
+    return result2;
   }
 
   /**
@@ -333,7 +336,7 @@ export class GeoDataManager {
         }
       }
     }
-    console.log('mergedResults', mergedResults);
+
     return mergedResults;
   }
 
