@@ -1,5 +1,5 @@
 import { QueryRadiusInput, QueryRectangleInput } from '../types';
-import { S2LatLng, S2LatLngRect } from 'nodes2ts';
+import { S2LatLng, S2LatLngRect, Utils } from 'nodes2ts';
 
 export class S2Util {
   public static latLngRectFromQueryRectangleInput(
@@ -59,6 +59,14 @@ export class S2Util {
       longitude + lngSpan,
     );
 
-    return S2LatLngRect.fromLatLng(minLatLng, maxLatLng);
+    const region = Utils.calcRegionFromCenterRadius(
+      centerLatLng,
+      geoQueryRequest.RadiusInMeter / 1000,
+    );
+    const rectBound = region.getRectBound();
+    const rect = S2LatLngRect.fromLatLng(minLatLng, maxLatLng);
+    console.info('rectBound', rectBound);
+    console.info('rect', rect);
+    return rect;
   }
 }
