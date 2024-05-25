@@ -39,29 +39,32 @@ export class S2Util {
       centerPoint.longitude,
     );
 
-    const latReferenceUnit = centerPoint.latitude > 0.0 ? -1.0 : 1.0;
+    // Reference points for distance calculations
     const latReferenceLatLng = S2LatLng.fromDegrees(
-      centerPoint.latitude + latReferenceUnit,
+      centerPoint.latitude + 1.0,
       centerPoint.longitude,
     );
-    const lngReferenceUnit = centerPoint.longitude > 0.0 ? -1.0 : 1.0;
     const lngReferenceLatLng = S2LatLng.fromDegrees(
       centerPoint.latitude,
-      centerPoint.longitude + lngReferenceUnit,
+      centerPoint.longitude + 1.0,
     );
 
-    const latForRadius =
-      radiusInMeter / centerLatLng.getEarthDistance(latReferenceLatLng);
-    const lngForRadius =
-      radiusInMeter / centerLatLng.getEarthDistance(lngReferenceLatLng);
+    // Calculate distances
+    const latDistance = centerLatLng.getEarthDistance(latReferenceLatLng);
+    const lngDistance = centerLatLng.getEarthDistance(lngReferenceLatLng);
 
+    // Calculate the latitude and longitude span
+    const latSpan = radiusInMeter / latDistance;
+    const lngSpan = radiusInMeter / lngDistance;
+
+    // Determine min and max latitudes and longitudes
     const minLatLng = S2LatLng.fromDegrees(
-      centerPoint.latitude - latForRadius,
-      centerPoint.longitude - lngForRadius,
+      centerPoint.latitude - latSpan,
+      centerPoint.longitude - lngSpan,
     );
     const maxLatLng = S2LatLng.fromDegrees(
-      centerPoint.latitude + latForRadius,
-      centerPoint.longitude + lngForRadius,
+      centerPoint.latitude + latSpan,
+      centerPoint.longitude + lngSpan,
     );
 
     return S2LatLngRect.fromLatLng(minLatLng, maxLatLng);
