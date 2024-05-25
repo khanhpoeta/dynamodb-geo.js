@@ -59,6 +59,7 @@ class DynamoDBManager {
             const maxRange = range.rangeMax.toInt();
             const ranges = [minRange, maxRange];
             console.log('hashKey', hashKey.toInt());
+            console.log('range.rangeMax', JSON.stringify(range));
             console.log('ranges', ranges);
             input.KeyConditions[this._config.geohashAttributeName] = {
                 ComparisonOperator: 'BETWEEN',

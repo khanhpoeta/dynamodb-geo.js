@@ -6,6 +6,7 @@ export class Covering {
 
   constructor(cellIds: S2CellId[]) {
     this.cellIds = cellIds;
+    console.log('cellIds', cellIds);
   }
 
   public getGeoHashRanges(hashKeyLength: number) {
