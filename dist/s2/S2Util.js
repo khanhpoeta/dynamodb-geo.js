@@ -20,24 +20,8 @@ class S2Util {
         const { latitude, longitude } = centerPoint;
         const radiusInMeter = geoQueryRequest.RadiusInMeter;
         const centerLatLng = nodes2ts_1.S2LatLng.fromDegrees(latitude, longitude);
-        // Reference points for distance calculations
-        const latReferenceLatLng = nodes2ts_1.S2LatLng.fromDegrees(latitude + 1.0, longitude);
-        const lngReferenceLatLng = nodes2ts_1.S2LatLng.fromDegrees(latitude, longitude + 1.0);
-        // Calculate distances
-        const latDistance = centerLatLng.getEarthDistance(latReferenceLatLng);
-        const lngDistance = centerLatLng.getEarthDistance(lngReferenceLatLng);
-        // Calculate the latitude and longitude span
-        const latSpan = radiusInMeter / latDistance;
-        const lngSpan = radiusInMeter / lngDistance;
-        // Determine min and max latitudes and longitudes
-        const minLatLng = nodes2ts_1.S2LatLng.fromDegrees(latitude - latSpan, longitude - lngSpan);
-        const maxLatLng = nodes2ts_1.S2LatLng.fromDegrees(latitude + latSpan, longitude + lngSpan);
-        const region = nodes2ts_1.Utils.calcRegionFromCenterRadius(centerLatLng, geoQueryRequest.RadiusInMeter / 1000);
-        const rectBound = region.getRectBound();
-        const rect = nodes2ts_1.S2LatLngRect.fromLatLng(minLatLng, maxLatLng);
-        console.info('rectBound', rectBound);
-        console.info('rect', rect);
-        return rect;
+        const region = nodes2ts_1.Utils.calcRegionFromCenterRadius(centerLatLng, radiusInMeter / 1000);
+        return region.getRectBound();
     }
 }
 exports.S2Util = S2Util;

@@ -9,8 +9,8 @@ const S2Manager_1 = require("../s2/S2Manager");
 const long_1 = __importDefault(require("long"));
 class GeohashRange {
     constructor(min, max) {
-        this.rangeMin = min instanceof long_1.default ? min : long_1.default.fromNumber(min);
-        this.rangeMax = max instanceof long_1.default ? max : long_1.default.fromNumber(max);
+        this.rangeMin = long_1.default.isLong(min) ? min : long_1.default.fromNumber(min);
+        this.rangeMax = long_1.default.isLong(max) ? max : long_1.default.fromNumber(max);
     }
     tryMerge(range) {
         if (range.rangeMin
