@@ -35,6 +35,7 @@ import {
   DeleteCommand,
 } from '@aws-sdk/lib-dynamodb';
 import Long from 'long';
+import { Util } from '../util/Util';
 
 export class DynamoDBManager {
   _config: GeoDataManagerConfiguration;
@@ -208,8 +209,16 @@ export class DynamoDBManager {
         },
       };
     });
-    RequestItems[this._config.tableName] = writeInputs;
-    return this._ddbDocClient.send(new BatchWriteCommand({ RequestItems }));
+    const chunkWriteInputs = Util.chunkArray(writeInputs, 25);
+    return Promise.allSettled(
+      chunkWriteInputs.map(inputs => {
+        const request = RequestItems;
+        request[this._config.tableName] = inputs;
+        return this._ddbDocClient.send(
+          new BatchWriteCommand({ RequestItems: request }),
+        );
+      }),
+    );
   }
 
   updatePoint(updatePointInput: UpdatePointInput) {
