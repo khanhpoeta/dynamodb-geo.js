@@ -33,6 +33,7 @@ import {
   BatchWriteCommand,
   UpdateCommand,
   DeleteCommand,
+  TransactWriteCommand,
 } from '@aws-sdk/lib-dynamodb';
 import Long from 'long';
 import { Util } from '../util/Util';
@@ -181,7 +182,6 @@ export class DynamoDBManager {
   }
 
   batchWritePoints(putPointInputs: PutPointInput[]) {
-    const RequestItems = {};
     const writeInputs = putPointInputs.map(i => {
       const geohash = S2Manager.generateGeohash(i.GeoPoint);
       const hashKey = S2Manager.generateHashKey(
@@ -204,18 +204,17 @@ export class DynamoDBManager {
           : [i.GeoPoint.latitude, i.GeoPoint.longitude],
       });
       return {
-        PutRequest: {
+        Put: {
+          TableName: this._config.tableName,
           Item,
         },
       };
     });
-    const chunkWriteInputs = Util.chunkArray(writeInputs, 25);
+    const chunkWriteInputs = Util.chunkArray(writeInputs, 36);
     return Promise.allSettled(
       chunkWriteInputs.map(inputs => {
-        const request = RequestItems;
-        request[this._config.tableName] = inputs;
         return this._ddbDocClient.send(
-          new BatchWriteCommand({ RequestItems: request }),
+          new TransactWriteCommand({ TransactItems: inputs }),
         );
       }),
     );
