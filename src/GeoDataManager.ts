@@ -232,8 +232,10 @@ export class GeoDataManager {
       new this.config.S2RegionCoverer().getCoveringCells(latLngRect),
     );
     const results = await this.dispatchQueries(covering, queryRadiusInput);
-    return this.mapDistance(results, queryRadiusInput).sort(
-      (a, b) => a.distance - b.distance,
+
+    return this.filterByRadius(
+      this.mapDistance(results, queryRadiusInput),
+      queryRadiusInput,
     );
   }
 
@@ -378,30 +380,8 @@ export class GeoDataManager {
     list: Record<string, any>[],
     geoQueryInput: QueryRadiusInput,
   ) {
-    const centerPoint: GeoPoint = (geoQueryInput as QueryRadiusInput)
-      .CenterPoint;
-
-    const centerLatLng = S2LatLng.fromDegrees(
-      centerPoint.latitude,
-      centerPoint.longitude,
-    );
-
-    const radiusInMeter = (geoQueryInput as QueryRadiusInput).RadiusInMeter;
-    const region = Utils.calcRegionFromCenterRadius(
-      centerLatLng,
-      radiusInMeter / 1000,
-    );
-
     return list.filter(item => {
-      const geoJson: string = item[this.config.geoJsonAttributeName];
-      const coordinates = JSON.parse(geoJson).coordinates;
-      const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
-      const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
-      const latLng = S2LatLng.fromDegrees(latitude, longitude);
-      const cell = S2Cell.fromLatLng(latLng);
-      const distance = latLng.getEarthDistance(centerLatLng);
-      item['distance'] = distance;
-      return true;
+      return item.distance <= geoQueryInput.RadiusInMeter;
     });
   }
 
