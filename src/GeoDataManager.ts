@@ -27,7 +27,7 @@ import {
 import { S2Manager } from './s2/S2Manager';
 import { S2Util } from './s2/S2Util';
 import { Covering } from './model/Covering';
-import { S2Cell, S2LatLng, S2LatLngRect, Utils } from 'nodes2ts';
+import { S2LatLng, S2LatLngRect } from 'nodes2ts';
 
 /**
  * <p>
@@ -328,7 +328,6 @@ export class GeoDataManager {
 
     const results = await Promise.all(promises);
     const mergedResults: Record<string, any>[] = [];
-    console.log('results', results);
     for (const queryOutputs of results) {
       for (const queryOutput of queryOutputs) {
         if (queryOutput.Items) {
@@ -365,7 +364,7 @@ export class GeoDataManager {
       const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
       const latLng = S2LatLng.fromDegrees(latitude, longitude);
       const distance = latLng.getEarthDistance(centerLatLng);
-      return { ...item, distance };
+      return { ...item, distance, longitude, latitude };
     });
   }
 

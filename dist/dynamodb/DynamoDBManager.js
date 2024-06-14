@@ -17,6 +17,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DynamoDBManager = void 0;
 const S2Manager_1 = require("../s2/S2Manager");
 const lib_dynamodb_1 = require("@aws-sdk/lib-dynamodb");
+const Util_1 = require("../util/Util");
 class DynamoDBManager {
     constructor(config) {
         this._config = config;
@@ -126,7 +127,6 @@ class DynamoDBManager {
         return this._ddbDocClient.send(new lib_dynamodb_1.PutCommand(putItemParams));
     }
     batchWritePoints(putPointInputs) {
-        const RequestItems = {};
         const writeInputs = putPointInputs.map(i => {
             const geohash = S2Manager_1.S2Manager.generateGeohash(i.GeoPoint);
             const hashKey = S2Manager_1.S2Manager.generateHashKey(geohash, this._config.hashKeyLength);
@@ -145,13 +145,16 @@ class DynamoDBManager {
                     : [i.GeoPoint.latitude, i.GeoPoint.longitude],
             });
             return {
-                PutRequest: {
+                Put: {
+                    TableName: this._config.tableName,
                     Item,
                 },
             };
         });
-        RequestItems[this._config.tableName] = writeInputs;
-        return this._ddbDocClient.send(new lib_dynamodb_1.BatchWriteCommand({ RequestItems }));
+        const chunkWriteInputs = Util_1.Util.chunkArray(writeInputs, 36);
+        return Promise.allSettled(chunkWriteInputs.map(inputs => {
+            return this._ddbDocClient.send(new lib_dynamodb_1.TransactWriteCommand({ TransactItems: inputs }));
+        }));
     }
     updatePoint(updatePointInput) {
         const geohash = S2Manager_1.S2Manager.generateGeohash(updatePointInput.GeoPoint);

@@ -94,7 +94,11 @@ export declare class GeoDataManager {
      *
      * @return Result of batch put point request.
      */
-    batchWritePoints(putPointInputs: PutPointInput[]): Promise<import("@aws-sdk/lib-dynamodb").BatchWriteCommandOutput>;
+    batchWritePoints(putPointInputs: PutPointInput[]): Promise<PromiseSettledResult<Omit<import("@aws-sdk/client-dynamodb").TransactWriteItemsCommandOutput, "ItemCollectionMetrics"> & {
+        ItemCollectionMetrics?: Record<string, (Omit<import("@aws-sdk/client-dynamodb").ItemCollectionMetrics, "ItemCollectionKey"> & {
+            ItemCollectionKey?: Record<string, any> | undefined;
+        })[]> | undefined;
+    }>[]>;
     /**
      * <p>
      * Get a point from the Amazon DynamoDB table.
@@ -165,9 +169,7 @@ export declare class GeoDataManager {
      *
      * @return Result of radius query request.
      * */
-    queryRadius(queryRadiusInput: QueryRadiusInput): Promise<{
-        distance: number;
-    }[]>;
+    queryRadius(queryRadiusInput: QueryRadiusInput): Promise<Record<string, any>[]>;
     /**
      * <p>
      * Update a point data in Amazon DynamoDB table. You cannot update attributes specified in

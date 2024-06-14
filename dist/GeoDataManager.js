@@ -206,7 +206,7 @@ class GeoDataManager {
         const latLngRect = S2Util_1.S2Util.getBoundingLatLngRectFromQueryRadiusInput(queryRadiusInput);
         const covering = new Covering_1.Covering(new this.config.S2RegionCoverer().getCoveringCells(latLngRect));
         const results = await this.dispatchQueries(covering, queryRadiusInput);
-        return this.mapDistance(results, queryRadiusInput).sort((a, b) => a.distance - b.distance);
+        return this.filterByRadius(this.mapDistance(results, queryRadiusInput), queryRadiusInput);
     }
     /**
      * <p>
@@ -284,7 +284,6 @@ class GeoDataManager {
         });
         const results = await Promise.all(promises);
         const mergedResults = [];
-        console.log('results', results);
         for (const queryOutputs of results) {
             for (const queryOutput of queryOutputs) {
                 if (queryOutput.Items) {
@@ -312,7 +311,7 @@ class GeoDataManager {
             const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
             const latLng = nodes2ts_1.S2LatLng.fromDegrees(latitude, longitude);
             const distance = latLng.getEarthDistance(centerLatLng);
-            return { ...item, distance };
+            return { ...item, distance, longitude, latitude };
         });
     }
     /**
@@ -323,21 +322,8 @@ class GeoDataManager {
      * @returns DynamoDB.ItemList
      */
     filterByRadius(list, geoQueryInput) {
-        const centerPoint = geoQueryInput
-            .CenterPoint;
-        const centerLatLng = nodes2ts_1.S2LatLng.fromDegrees(centerPoint.latitude, centerPoint.longitude);
-        const radiusInMeter = geoQueryInput.RadiusInMeter;
-        const region = nodes2ts_1.Utils.calcRegionFromCenterRadius(centerLatLng, radiusInMeter / 1000);
         return list.filter(item => {
-            const geoJson = item[this.config.geoJsonAttributeName];
-            const coordinates = JSON.parse(geoJson).coordinates;
-            const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
-            const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
-            const latLng = nodes2ts_1.S2LatLng.fromDegrees(latitude, longitude);
-            const cell = nodes2ts_1.S2Cell.fromLatLng(latLng);
-            const distance = latLng.getEarthDistance(centerLatLng);
-            item['distance'] = distance;
-            return true;
+            return item.distance <= geoQueryInput.RadiusInMeter;
         });
     }
     /**

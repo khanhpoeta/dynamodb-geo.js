@@ -5,7 +5,6 @@ const GeohashRange_1 = require("./GeohashRange");
 class Covering {
     constructor(cellIds) {
         this.cellIds = cellIds;
-        console.log('cellIds', cellIds);
     }
     getGeoHashRanges(hashKeyLength) {
         const ranges = [];
